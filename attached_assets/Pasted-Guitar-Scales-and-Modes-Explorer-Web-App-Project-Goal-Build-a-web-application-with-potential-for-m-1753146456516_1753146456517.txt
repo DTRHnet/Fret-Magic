@@ -1,0 +1,33 @@
+Guitar Scales and Modes Explorer Web App
+Project Goal: Build a web application (with potential for mobile app adaptation) that enables guitarists to explore scales, modes, and custom/open tunings for 6, 7, and 8-string guitars. The app should generate interactive fretboard maps showing root notes and scale/mode notes across the entire fretboard, supporting custom tunings and providing a user-friendly interface.
+Tech Stack:
+•  Frontend: HTML, CSS, JavaScript (React.js or Vue.js for interactivity; consider Svelte for lightweight performance).
+•  Backend (optional): Node.js with Express for handling complex calculations or saving user presets (optional for initial MVP).
+•  Libraries:
+	•  Chart.js or D3.js for fretboard visualization (optional for advanced graphics).
+	•  Tone.js for audio feedback (optional for playing note sounds).
+•  Mobile Adaptation: Use Capacitor or React Native for Android/iOS deployment if extending to mobile.
+•  Hosting: Replit for development and initial deployment; ensure compatibility with mobile browsers.
+Core Features:
+1.  Guitar Configuration:
+	•  Select guitar type: 6-string, 7-string, or 8-string.
+	•  Input custom tunings (e.g., EADGBE, DADGAD, CGDAEG, etc.) or choose from presets (standard, drop, open tunings like Open D, Open G).
+	•  Validate tuning input to ensure valid musical notes (e.g., A, A#, B, etc.).
+2.  Scale and Mode Selection:
+	•  Dropdown or searchable list of scales (e.g., Major, Minor, Pentatonic) and modes (e.g., Ionian, Dorian, Phrygian, etc.).
+	•  Support for common and exotic scales (e.g., Harmonic Minor, Whole Tone, etc.).
+	•  Option to select root note (e.g., C, F#, etc.).
+3.  Fretboard Visualization:
+	•  Display an interactive fretboard (up to 24 frets) for the selected guitar type and tuning.
+	•  Highlight root notes and scale/mode notes with distinct colors (e.g., root notes in red, scale notes in blue).
+	•  Allow toggling between note names (e.g., C, D#, G) and intervals (e.g., R, 3, b5).
+	•  Responsive design for desktop and mobile screens.
+4.  Custom Features:
+	•  Combine multiple scales/modes on the fretboard (e.g., show C Major and C Dorian simultaneously with different colors).
+	•  Save custom tuning and scale presets for quick access.
+	•  Export fretboard map as an image or PDF.
+5.  Optional Enhancements:
+	•  Audio playback of selected notes or scales using Tone.js.
+	•  Chord detection: Highlight chords within the selected scale/mode.
+	•  Metronome or backing track integration for practice.
+	•  Mobile app support via Capacitor/React Native for Android/iOS
