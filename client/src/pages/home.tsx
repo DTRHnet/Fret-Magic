@@ -196,12 +196,15 @@ export default function Home() {
       </div>
       
       {/* Footer */}
-      <footer className="bg-slate-100 border-t border-slate-200 py-6">
+      <footer className="mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-sm text-slate-600">
-            &lt; A DTRH.NET PROJECT - KBS (admin@dtrh.net) 2025 &gt;
+          <div className="bg-blue-600 shadow-lg rounded-lg p-4 border-2 border-blue-700">
+            <div className="text-center text-sm font-bold text-white">
+              &lt; A DTRH.NET PROJECT - KBS (admin@dtrh.net) 2025 &gt;
+            </div>
           </div>
         </div>
+        <div className="pb-4"></div>
       </footer>
     </div>
   );
