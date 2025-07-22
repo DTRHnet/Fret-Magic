@@ -348,11 +348,25 @@ export function generateChordProgression(
   scaleType: string, 
   romanNumerals: string[]
 ): ChordProgressionItem[] {
-  // Import SCALES from music-theory - we'll use dynamic import to avoid circular dependency
   try {
-    const musicTheory = require('./music-theory');
-    const scale = musicTheory.SCALES[scaleType];
-    if (!scale) return [];
+    // Create scale manually to avoid circular imports
+    const majorScale = { intervals: [0, 2, 4, 5, 7, 9, 11] };
+    const minorScale = { intervals: [0, 2, 3, 5, 7, 8, 10] };
+    const dorianScale = { intervals: [0, 2, 3, 5, 7, 9, 10] };
+    
+    const scaleMap: Record<string, { intervals: number[] }> = {
+      'major': majorScale,
+      'ionian': majorScale,
+      'minor': minorScale,
+      'aeolian': minorScale,
+      'dorian': dorianScale,
+      'phrygian': { intervals: [0, 1, 3, 5, 7, 8, 10] },
+      'lydian': { intervals: [0, 2, 4, 6, 7, 9, 11] },
+      'mixolydian': { intervals: [0, 2, 4, 5, 7, 9, 10] },
+      'locrian': { intervals: [0, 1, 3, 5, 6, 8, 10] }
+    };
+    
+    const scale = scaleMap[scaleType] || majorScale;
 
     const rootIndex = CHROMATIC_NOTES.indexOf(rootNote);
     if (rootIndex === -1) return [];

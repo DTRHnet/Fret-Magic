@@ -160,9 +160,111 @@ export default function Home() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Mobile/Tablet Layout */}
+        <div className="lg:hidden space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="guitar-controls">
+              <GuitarControls
+                guitarType={guitarType}
+                setGuitarType={setGuitarType}
+                tuning={tuning}
+                setTuning={setTuning}
+                onCustomSelected={() => setForceCustomTuning(true)}
+                onPresetSelected={() => setForceCustomTuning(false)}
+              />
+            </div>
+            
+            <div id="scale-controls">
+              <ScaleControls
+                rootNote={rootNote}
+                setRootNote={setRootNote}
+                scaleType={scaleType}
+                setScaleType={setScaleType}
+              />
+            </div>
+            
+            <div id="display-controls">
+              <DisplayControls
+                displayMode={displayMode}
+                setDisplayMode={setDisplayMode}
+                fretRange={fretRange}
+                setFretRange={setFretRange}
+                showOptions={showOptions}
+                setShowOptions={setShowOptions}
+              />
+            </div>
+            
+            <div id="tuning-controls">
+              {isCustomTuning ? (
+                <CustomTuning
+                  guitarType={guitarType}
+                  tuning={tuning}
+                  setTuning={setTuning}
+                />
+              ) : (
+                <TuningHelper
+                  guitarType={guitarType}
+                  tuning={tuning}
+                />
+              )}
+            </div>
+          </div>
+
+          <div id="fretboard-container">
+            <Fretboard
+              guitarType={guitarType}
+              tuning={tuning}
+              rootNote={rootNote}
+              scaleType={scaleType}
+              displayMode={displayMode}
+              fretRange={fretRange}
+              showOptions={showOptions}
+              currentScale={currentScale}
+              fretboardNotes={fretboardNotes}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ChordShapes
+              rootNote={rootNote}
+              scaleType={scaleType}
+              currentScale={currentScale}
+            />
+
+            <ChordProgressionGenerator
+              rootNote={rootNote}
+              scaleType={scaleType}
+              onChordSelect={(chordNotes) => {
+                console.log('Selected chord notes:', chordNotes);
+                // TODO: Highlight chord notes on fretboard
+              }}
+            />
+
+            <AudioControls
+              rootNote={rootNote}
+              scaleType={scaleType}
+              currentScale={currentScale}
+            />
+
+            <ShareControls
+              rootNote={rootNote}
+              scaleType={scaleType}
+              guitarType={guitarType}
+              tuning={tuning}
+              showNotes={showOptions.notes}
+              showIntervals={showOptions.intervals}
+              showFretNumbers={showOptions.fretNumbers}
+              fretRange={fretRange}
+              displayMode={displayMode}
+              currentScale={currentScale}
+            />
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden lg:grid lg:grid-cols-12 gap-6">
           
-          {/* Controls Sidebar */}
+          {/* Left Controls Column */}
           <div className="lg:col-span-3 space-y-6">
             <div id="guitar-controls">
               <GuitarControls
@@ -209,7 +311,25 @@ export default function Home() {
                 />
               )}
             </div>
+          </div>
+          
+          {/* Center Fretboard */}
+          <div className="lg:col-span-6" id="fretboard-container">
+            <Fretboard
+              guitarType={guitarType}
+              tuning={tuning}
+              rootNote={rootNote}
+              scaleType={scaleType}
+              displayMode={displayMode}
+              fretRange={fretRange}
+              showOptions={showOptions}
+              currentScale={currentScale}
+              fretboardNotes={fretboardNotes}
+            />
+          </div>
 
+          {/* Right Tools Column */}
+          <div className="lg:col-span-3 space-y-6">
             <ChordShapes
               rootNote={rootNote}
               scaleType={scaleType}
@@ -242,21 +362,6 @@ export default function Home() {
               fretRange={fretRange}
               displayMode={displayMode}
               currentScale={currentScale}
-            />
-          </div>
-          
-          {/* Main Fretboard */}
-          <div className="lg:col-span-9" id="fretboard-container">
-            <Fretboard
-              guitarType={guitarType}
-              tuning={tuning}
-              rootNote={rootNote}
-              scaleType={scaleType}
-              displayMode={displayMode}
-              fretRange={fretRange}
-              showOptions={showOptions}
-              currentScale={currentScale}
-              fretboardNotes={fretboardNotes}
             />
           </div>
           
