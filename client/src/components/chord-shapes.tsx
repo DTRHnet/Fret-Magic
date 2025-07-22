@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import { Music2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { generateChordsForScale, renderChordDiagram, ChordProgression } from "@/lib/chords";
@@ -38,6 +39,7 @@ interface ChordShapesProps {
 
 export default function ChordShapes({ rootNote, scaleType, currentScale }: ChordShapesProps) {
   const [selectedChord, setSelectedChord] = useState<number>(0);
+  const [isNoteExpanded, setIsNoteExpanded] = useState<boolean>(false);
   
   // Generate chords for the current scale
   // Convert pattern to intervals if needed
@@ -169,16 +171,32 @@ export default function ChordShapes({ rootNote, scaleType, currentScale }: Chord
           </div>
         </div>
 
-        {/* Instructions */}
-        <div className="mt-4 p-4 bg-slate-100 rounded-lg">
-          <h5 className="font-medium text-slate-700 mb-2">How to use:</h5>
-          <ul className="text-sm text-slate-600 space-y-1">
-            <li>• Click any chord button to see its fingering patterns</li>
-            <li>• Each chord shows multiple shape variations when available</li>
-            <li>• Numbers on dots indicate which finger to use (1-4)</li>
-            <li>• 'X' means don't play that string, 'O' means play open</li>
-            <li>• Barre chords show the barring finger across multiple strings</li>
-          </ul>
+        {/* Custom Tuning Note */}
+        <div className="mt-4 border border-amber-200 rounded-lg bg-amber-50">
+          <button
+            onClick={() => setIsNoteExpanded(!isNoteExpanded)}
+            className="w-full p-4 flex items-center justify-between text-left hover:bg-amber-100 transition-colors"
+          >
+            <div className="flex items-center">
+              <Info className="w-4 h-4 mr-2 text-amber-600" />
+              <span className="font-medium text-amber-900">Custom Tuning Tip</span>
+            </div>
+            {isNoteExpanded ? (
+              <ChevronUp className="w-4 h-4 text-amber-600" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-amber-600" />
+            )}
+          </button>
+          
+          {isNoteExpanded && (
+            <div className="px-4 pb-4">
+              <p className="text-sm text-amber-800">
+                Select <strong>"Custom Tuning"</strong> from the tuning dropdown above to activate 
+                the half-step tuning controls. This will give you precise up/down arrow buttons 
+                for each string, allowing you to create any custom tuning with audio feedback.
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
