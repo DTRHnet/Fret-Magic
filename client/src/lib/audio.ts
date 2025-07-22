@@ -28,27 +28,98 @@ const STRING_OCTAVES: Record<number, number[]> = {
   8: [1, 1, 2, 2, 3, 3, 3, 4] // F#1, B1, E2, A2, D3, G3, B3, E4
 };
 
+// Audio tone options
+export interface AudioToneSettings {
+  type: 'acoustic' | 'electric' | 'clean' | 'distorted' | 'bass';
+  attack: number;
+  decay: number;
+  sustain: number;
+  release: number;
+}
+
+const TONE_PRESETS: Record<string, AudioToneSettings> = {
+  acoustic: {
+    type: 'acoustic',
+    attack: 0.01,
+    decay: 0.2,
+    sustain: 0.3,
+    release: 1.0
+  },
+  electric: {
+    type: 'electric',
+    attack: 0.05,
+    decay: 0.1,
+    sustain: 0.6,
+    release: 0.5
+  },
+  clean: {
+    type: 'clean',
+    attack: 0.02,
+    decay: 0.1,
+    sustain: 0.4,
+    release: 0.8
+  },
+  distorted: {
+    type: 'distorted',
+    attack: 0.01,
+    decay: 0.05,
+    sustain: 0.8,
+    release: 0.3
+  },
+  bass: {
+    type: 'bass',
+    attack: 0.02,
+    decay: 0.3,
+    sustain: 0.7,
+    release: 1.2
+  }
+};
+
 class AudioEngine {
   private synth: Tone.Synth | null = null;
   private volume = 0.5;
   private isMuted = false;
+  private currentTone: AudioToneSettings = TONE_PRESETS.acoustic;
+  private isPlaying = false;
+  private playbackQueue: Array<{ frequency: number; time: number; duration: string }> = [];
 
   async initialize() {
     if (!this.synth) {
       await Tone.start();
-      this.synth = new Tone.Synth({
-        oscillator: {
-          type: "sawtooth"
-        },
-        envelope: {
-          attack: 0.05,
-          decay: 0.1,
-          sustain: 0.2,
-          release: 0.5
-        }
-      }).toDestination();
+      this.createSynth();
     }
     return this.synth;
+  }
+
+  private createSynth() {
+    if (this.synth) {
+      this.synth.dispose();
+    }
+
+    const oscillatorType = this.getOscillatorType(this.currentTone.type);
+    
+    this.synth = new Tone.Synth({
+      oscillator: {
+        type: oscillatorType as any
+      },
+      envelope: {
+        attack: this.currentTone.attack,
+        decay: this.currentTone.decay,
+        sustain: this.currentTone.sustain,
+        release: this.currentTone.release
+      }
+    }).toDestination();
+  }
+
+  private getOscillatorType(toneType: string): string {
+    switch (toneType) {
+      case 'acoustic': return 'triangle';
+      case 'electric': return 'sawtooth';
+      case 'clean': return 'sine';
+      case 'distorted': return 'square';
+      case 'bass': return 'sawtooth';
+      default: return 'triangle';
+    }
   }
 
   setVolume(volume: number) {
@@ -57,6 +128,21 @@ class AudioEngine {
 
   setMuted(muted: boolean) {
     this.isMuted = muted;
+  }
+
+  setTone(toneType: string) {
+    if (TONE_PRESETS[toneType]) {
+      this.currentTone = TONE_PRESETS[toneType];
+      this.createSynth();
+    }
+  }
+
+  getToneOptions() {
+    return Object.keys(TONE_PRESETS);
+  }
+
+  getCurrentTone() {
+    return this.currentTone.type;
   }
 
   getStringFrequency(note: string, stringIndex: number, guitarType: number): number {
@@ -76,6 +162,8 @@ class AudioEngine {
   async playNote(frequency: number, duration = "8n") {
     try {
       const synth = await this.initialize();
+      if (!synth) return;
+      
       const actualVolume = this.isMuted ? 0 : this.volume;
       
       synth.volume.value = Tone.gainToDb(actualVolume);
@@ -89,6 +177,118 @@ class AudioEngine {
   async playFretboardNote(note: string, stringIndex: number, fret: number, guitarType: number) {
     const frequency = this.getFretFrequency(note, stringIndex, fret, guitarType);
     await this.playNote(frequency, "4n");
+  }
+
+  // Play a scale pattern
+  async playScale(notes: string[], tempo = 120, noteLength = "8n") {
+    if (this.isPlaying) {
+      this.stopPlayback();
+      return;
+    }
+
+    this.isPlaying = true;
+    const noteDuration = Tone.Time(noteLength).toSeconds();
+    const intervalTime = (60 / tempo) * (Tone.Time("4n").toSeconds() / Tone.Time(noteLength).toSeconds());
+
+    try {
+      const synth = await this.initialize();
+      if (!synth) return;
+      
+      for (let i = 0; i < notes.length && this.isPlaying; i++) {
+        const frequency = NOTE_FREQUENCIES[normalizeNote(notes[i])] || 440;
+        
+        const actualVolume = this.isMuted ? 0 : this.volume;
+        synth.volume.value = Tone.gainToDb(actualVolume);
+        
+        synth.triggerAttackRelease(frequency, noteLength);
+        
+        // Wait for the interval before playing the next note
+        await new Promise(resolve => setTimeout(resolve, intervalTime * 1000));
+      }
+    } catch (error) {
+      console.error("Scale playback error:", error);
+    } finally {
+      this.isPlaying = false;
+    }
+  }
+
+  // Play a chord progression
+  async playChordProgression(chords: string[][], tempo = 120, chordDuration = "2n") {
+    if (this.isPlaying) {
+      this.stopPlayback();
+      return;
+    }
+
+    this.isPlaying = true;
+    const chordTime = Tone.Time(chordDuration).toSeconds();
+    const intervalTime = (60 / tempo) * (Tone.Time("4n").toSeconds() / Tone.Time(chordDuration).toSeconds());
+
+    try {
+      const synth = await this.initialize();
+      if (!synth) return;
+      
+      for (let i = 0; i < chords.length && this.isPlaying; i++) {
+        const chord = chords[i];
+        const actualVolume = this.isMuted ? 0 : this.volume;
+        synth.volume.value = Tone.gainToDb(actualVolume);
+        
+        // Play all notes in the chord simultaneously
+        chord.forEach(note => {
+          const frequency = NOTE_FREQUENCIES[normalizeNote(note)] || 440;
+          synth.triggerAttackRelease(frequency, chordDuration);
+        });
+        
+        // Wait for the chord duration before playing the next chord
+        await new Promise(resolve => setTimeout(resolve, intervalTime * 1000));
+      }
+    } catch (error) {
+      console.error("Chord progression playback error:", error);
+    } finally {
+      this.isPlaying = false;
+    }
+  }
+
+  // Play an arpeggio pattern
+  async playArpeggio(notes: string[], pattern: number[] = [0, 1, 2, 1], tempo = 120) {
+    if (this.isPlaying) {
+      this.stopPlayback();
+      return;
+    }
+
+    this.isPlaying = true;
+    const noteLength = "8n";
+    const intervalTime = (60 / tempo) * (Tone.Time("4n").toSeconds() / Tone.Time(noteLength).toSeconds());
+
+    try {
+      const synth = await this.initialize();
+      if (!synth) return;
+      
+      for (let i = 0; i < pattern.length && this.isPlaying; i++) {
+        const noteIndex = pattern[i] % notes.length;
+        const note = notes[noteIndex];
+        const frequency = NOTE_FREQUENCIES[normalizeNote(note)] || 440;
+        
+        const actualVolume = this.isMuted ? 0 : this.volume;
+        synth.volume.value = Tone.gainToDb(actualVolume);
+        
+        synth.triggerAttackRelease(frequency, noteLength);
+        
+        await new Promise(resolve => setTimeout(resolve, intervalTime * 1000));
+      }
+    } catch (error) {
+      console.error("Arpeggio playback error:", error);
+    } finally {
+      this.isPlaying = false;
+    }
+  }
+
+  stopPlayback() {
+    this.isPlaying = false;
+    this.playbackQueue = [];
+  }
+
+  isCurrentlyPlaying() {
+    return this.isPlaying;
   }
 
   dispose() {

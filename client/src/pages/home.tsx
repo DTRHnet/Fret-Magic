@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Guitar, Download, FileImage, FileText } from "lucide-react";
 import { useFretboard } from "@/hooks/use-fretboard";
 import GuitarControls from "@/components/guitar-controls";
@@ -10,10 +10,14 @@ import Fretboard from "@/components/fretboard";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ExternalLink } from "lucide-react";
-import { exportToPNG, exportToPDF, createExportMetadata } from "@/lib/export";
+import { exportToPNG, exportToPDF, createExportMetadata, parseConfigFromUrl } from "@/lib/export";
 import { SCALES } from "@/lib/music-theory";
 import { TUNING_PRESETS } from "@/lib/guitar-data";
 import ChordShapes from "@/components/chord-shapes";
+import { TutorialButton } from "@/components/tutorial-mode";
+import ChordProgressionGenerator from "@/components/chord-progression-generator";
+import AudioControls from "@/components/audio-controls";
+import ShareControls from "@/components/share-controls";
 
 export default function Home() {
   const [forceCustomTuning, setForceCustomTuning] = useState(false);
@@ -44,6 +48,30 @@ export default function Home() {
   )?.[0];
   
   const isCustomTuning = !currentPreset || forceCustomTuning;
+
+  // Load configuration from URL parameters on mount
+  useEffect(() => {
+    const urlConfig = parseConfigFromUrl();
+    if (urlConfig) {
+      if (urlConfig.rootNote) setRootNote(urlConfig.rootNote);
+      if (urlConfig.scaleType) setScaleType(urlConfig.scaleType);
+      if (urlConfig.guitarType) setGuitarType(urlConfig.guitarType);
+      if (urlConfig.displayMode) setDisplayMode(urlConfig.displayMode);
+      if (urlConfig.fretRange) setFretRange(urlConfig.fretRange);
+      if (urlConfig.showNotes !== undefined || urlConfig.showIntervals !== undefined || urlConfig.showFretNumbers !== undefined) {
+        setShowOptions({
+          notes: urlConfig.showNotes ?? showOptions.notes,
+          intervals: urlConfig.showIntervals ?? showOptions.intervals,
+          fretNumbers: urlConfig.showFretNumbers ?? showOptions.fretNumbers
+        });
+      }
+      
+      // Force custom tuning mode if tuning was provided
+      if (urlConfig.tuning) {
+        setForceCustomTuning(true);
+      }
+    }
+  }, []);
 
   const handleExportPNG = async () => {
     try {
@@ -93,26 +121,30 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Export Options */}
+            {/* Export Options and Tutorial */}
             <div className="flex items-center space-x-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={handleExportPNG}>
-                    <FileImage className="w-4 h-4 mr-2" />
-                    Export as PNG
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleExportPDF}>
-                    <FileText className="w-4 h-4 mr-2" />
-                    Export as PDF
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <TutorialButton />
+              
+              <div id="export-controls">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      Export
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={handleExportPNG}>
+                      <FileImage className="w-4 h-4 mr-2" />
+                      Export as PNG
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportPDF}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Export as PDF
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               
               <Button 
                 variant="outline" 
@@ -132,47 +164,83 @@ export default function Home() {
           
           {/* Controls Sidebar */}
           <div className="lg:col-span-3 space-y-6">
-            <GuitarControls
-              guitarType={guitarType}
-              setGuitarType={setGuitarType}
-              tuning={tuning}
-              setTuning={setTuning}
-              onCustomSelected={() => setForceCustomTuning(true)}
-              onPresetSelected={() => setForceCustomTuning(false)}
-            />
-            
-            <ScaleControls
-              rootNote={rootNote}
-              setRootNote={setRootNote}
-              scaleType={scaleType}
-              setScaleType={setScaleType}
-            />
-            
-            <DisplayControls
-              displayMode={displayMode}
-              setDisplayMode={setDisplayMode}
-              fretRange={fretRange}
-              setFretRange={setFretRange}
-              showOptions={showOptions}
-              setShowOptions={setShowOptions}
-            />
-            
-            {isCustomTuning ? (
-              <CustomTuning
+            <div id="guitar-controls">
+              <GuitarControls
                 guitarType={guitarType}
+                setGuitarType={setGuitarType}
                 tuning={tuning}
                 setTuning={setTuning}
+                onCustomSelected={() => setForceCustomTuning(true)}
+                onPresetSelected={() => setForceCustomTuning(false)}
               />
-            ) : (
-              <TuningHelper
-                guitarType={guitarType}
-                tuning={tuning}
+            </div>
+            
+            <div id="scale-controls">
+              <ScaleControls
+                rootNote={rootNote}
+                setRootNote={setRootNote}
+                scaleType={scaleType}
+                setScaleType={setScaleType}
               />
-            )}
+            </div>
+            
+            <div id="display-controls">
+              <DisplayControls
+                displayMode={displayMode}
+                setDisplayMode={setDisplayMode}
+                fretRange={fretRange}
+                setFretRange={setFretRange}
+                showOptions={showOptions}
+                setShowOptions={setShowOptions}
+              />
+            </div>
+            
+            <div id="tuning-controls">
+              {isCustomTuning ? (
+                <CustomTuning
+                  guitarType={guitarType}
+                  tuning={tuning}
+                  setTuning={setTuning}
+                />
+              ) : (
+                <TuningHelper
+                  guitarType={guitarType}
+                  tuning={tuning}
+                />
+              )}
+            </div>
 
             <ChordShapes
               rootNote={rootNote}
               scaleType={scaleType}
+              currentScale={currentScale}
+            />
+
+            <ChordProgressionGenerator
+              rootNote={rootNote}
+              scaleType={scaleType}
+              onChordSelect={(chordNotes) => {
+                console.log('Selected chord notes:', chordNotes);
+                // TODO: Highlight chord notes on fretboard
+              }}
+            />
+
+            <AudioControls
+              rootNote={rootNote}
+              scaleType={scaleType}
+              currentScale={currentScale}
+            />
+
+            <ShareControls
+              rootNote={rootNote}
+              scaleType={scaleType}
+              guitarType={guitarType}
+              tuning={tuning}
+              showNotes={showOptions.notes}
+              showIntervals={showOptions.intervals}
+              showFretNumbers={showOptions.fretNumbers}
+              fretRange={fretRange}
+              displayMode={displayMode}
               currentScale={currentScale}
             />
           </div>

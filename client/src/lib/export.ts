@@ -224,3 +224,162 @@ export function createExportMetadata(
     timestamp: new Date().toLocaleString()
   };
 }
+
+// Shareable configuration interface
+export interface ShareableConfig {
+  rootNote: string;
+  scaleType: string;
+  guitarType: number;
+  tuning: string[];
+  showNotes: boolean;
+  showIntervals: boolean;
+  showFretNumbers: boolean;
+  fretRange: [number, number];
+  displayMode: 'notes' | 'intervals';
+}
+
+// Create a shareable URL with configuration
+export function createShareableUrl(config: ShareableConfig): string {
+  const baseUrl = window.location.origin + window.location.pathname;
+  const params = new URLSearchParams();
+  
+  params.set('root', config.rootNote);
+  params.set('scale', config.scaleType);
+  params.set('guitar', config.guitarType.toString());
+  params.set('tuning', config.tuning.join(','));
+  params.set('notes', config.showNotes.toString());
+  params.set('intervals', config.showIntervals.toString());
+  params.set('frets', config.showFretNumbers.toString());
+  params.set('range', `${config.fretRange[0]}-${config.fretRange[1]}`);
+  params.set('mode', config.displayMode);
+  
+  return `${baseUrl}?${params.toString()}`;
+}
+
+// Parse configuration from URL parameters
+export function parseConfigFromUrl(): Partial<ShareableConfig> | null {
+  const params = new URLSearchParams(window.location.search);
+  
+  if (!params.has('root') || !params.has('scale')) {
+    return null;
+  }
+  
+  try {
+    const config: Partial<ShareableConfig> = {
+      rootNote: params.get('root') || 'C',
+      scaleType: params.get('scale') || 'major',
+      guitarType: parseInt(params.get('guitar') || '6'),
+      tuning: params.get('tuning')?.split(',') || ['E', 'A', 'D', 'G', 'B', 'E'],
+      showNotes: params.get('notes') === 'true',
+      showIntervals: params.get('intervals') === 'true',
+      showFretNumbers: params.get('frets') === 'true',
+      displayMode: (params.get('mode') as 'notes' | 'intervals') || 'notes'
+    };
+    
+    const rangeParam = params.get('range');
+    if (rangeParam) {
+      const [start, end] = rangeParam.split('-').map(Number);
+      config.fretRange = [start, end];
+    }
+    
+    return config;
+  } catch (error) {
+    console.error('Error parsing config from URL:', error);
+    return null;
+  }
+}
+
+// Generate a shareable image with embedded link
+export async function createShareableImage(
+  elementId: string,
+  metadata: ExportMetadata,
+  shareUrl: string
+): Promise<string> {
+  try {
+    const element = document.getElementById(elementId);
+    if (!element) {
+      throw new Error(`Element with id '${elementId}' not found`);
+    }
+
+    // Create enhanced container for shareable image
+    const container = document.createElement('div');
+    container.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    container.style.padding = '30px';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.borderRadius = '16px';
+    container.style.boxShadow = '0 20px 40px rgba(0,0,0,0.2)';
+
+    // Add branding header
+    const header = document.createElement('div');
+    header.style.cssText = 'background: rgba(255,255,255,0.95); padding: 20px; border-radius: 12px; margin-bottom: 20px; backdrop-filter: blur(10px);';
+    
+    const title = document.createElement('h1');
+    title.textContent = 'FretMagic';
+    title.style.cssText = 'margin: 0 0 10px 0; color: #1e293b; font-size: 28px; font-weight: bold;';
+    
+    const subtitle = document.createElement('p');
+    subtitle.textContent = `${metadata.scaleName} Scale • ${metadata.rootNote} Root • ${metadata.guitarType}-String Guitar`;
+    subtitle.style.cssText = 'margin: 0 0 15px 0; color: #64748b; font-size: 16px;';
+    
+    const shareInfo = document.createElement('div');
+    shareInfo.style.cssText = 'display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;';
+    
+    const urlDisplay = document.createElement('code');
+    urlDisplay.textContent = shareUrl;
+    urlDisplay.style.cssText = 'background: #f1f5f9; padding: 8px 12px; border-radius: 6px; font-size: 12px; color: #475569; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+    
+    const qrPlaceholder = document.createElement('div');
+    qrPlaceholder.textContent = 'Scan to view online';
+    qrPlaceholder.style.cssText = 'background: #e2e8f0; width: 60px; height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #64748b; text-align: center; line-height: 1.2;';
+    
+    shareInfo.appendChild(urlDisplay);
+    shareInfo.appendChild(qrPlaceholder);
+    
+    header.appendChild(title);
+    header.appendChild(subtitle);
+    header.appendChild(shareInfo);
+
+    // Add fretboard with enhanced styling
+    const fretboardWrapper = document.createElement('div');
+    fretboardWrapper.style.cssText = 'background: rgba(255,255,255,0.98); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px);';
+    
+    const fretboardClone = element.cloneNode(true) as HTMLElement;
+    fretboardWrapper.appendChild(fretboardClone);
+    
+    // Add footer
+    const footer = document.createElement('div');
+    footer.style.cssText = 'margin-top: 20px; text-align: center; color: rgba(255,255,255,0.9); font-size: 14px;';
+    footer.textContent = `Generated on ${metadata.timestamp} • Visit the link above to interact with this fretboard`;
+    
+    container.appendChild(header);
+    container.appendChild(fretboardWrapper);
+    container.appendChild(footer);
+    
+    // Temporarily add to document
+    container.style.position = 'absolute';
+    container.style.top = '-20000px';
+    container.style.left = '0';
+    container.style.width = '800px';
+    document.body.appendChild(container);
+
+    // Generate the canvas
+    const canvas = await html2canvas(container, {
+      backgroundColor: null,
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      width: 800,
+      height: container.offsetHeight
+    });
+
+    // Remove the temporary container
+    document.body.removeChild(container);
+
+    // Return the data URL
+    return canvas.toDataURL('image/png', 0.9);
+  } catch (error) {
+    console.error('Shareable image creation failed:', error);
+    throw error;
+  }
+}

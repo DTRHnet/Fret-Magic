@@ -327,3 +327,133 @@ export function renderChordDiagram(shape: ChordShape, size: number = 120): strin
   svg += '</svg>';
   return svg;
 }
+
+// Roman numeral mappings for chord progressions
+const ROMAN_NUMERALS = {
+  'I': 0, 'ii': 1, 'iii': 2, 'IV': 3, 'V': 4, 'vi': 5, 'vii': 6,
+  'i': 0, 'II': 1, 'III': 2, 'iv': 3, 'v': 4, 'VI': 5, 'VII': 6,
+  'bVII': 6, 'bVI': 5, 'bIII': 2, 'bII': 1
+};
+
+// Chord progression interface for the generator
+export interface ChordProgressionItem {
+  symbol: string;
+  roman: string;
+  notes: string[];
+  quality: 'major' | 'minor' | 'diminished' | 'augmented';
+}
+
+export function generateChordProgression(
+  rootNote: string, 
+  scaleType: string, 
+  romanNumerals: string[]
+): ChordProgressionItem[] {
+  // Import SCALES from music-theory - we'll use dynamic import to avoid circular dependency
+  try {
+    const musicTheory = require('./music-theory');
+    const scale = musicTheory.SCALES[scaleType];
+    if (!scale) return [];
+
+    const rootIndex = CHROMATIC_NOTES.indexOf(rootNote);
+    if (rootIndex === -1) return [];
+
+    const scaleNotes = scale.intervals.map((interval: number) => 
+      CHROMATIC_NOTES[(rootIndex + interval) % 12]
+    );
+
+    const result: ChordProgressionItem[] = [];
+    
+    for (const roman of romanNumerals) {
+      const degree = ROMAN_NUMERALS[roman as keyof typeof ROMAN_NUMERALS];
+      if (degree === undefined) continue;
+
+      const chordRoot = scaleNotes[degree];
+      const isMinor = roman === roman.toLowerCase() || roman.includes('i');
+      const isDiminished = roman.includes('°') || roman === 'vii';
+
+      let symbol = chordRoot;
+      let quality: 'major' | 'minor' | 'diminished' | 'augmented' = 'major';
+
+      if (isDiminished) {
+        symbol += '°';
+        quality = 'diminished';
+      } else if (isMinor) {
+        symbol += 'm';
+        quality = 'minor';
+      }
+
+      const notes = getChordNotes(chordRoot, scaleType, symbol);
+
+      result.push({
+        symbol,
+        roman,
+        notes,
+        quality
+      });
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error generating chord progression:', error);
+    return [];
+  }
+}
+
+export function getChordNotes(rootNote: string, scaleType: string, chordSymbol: string): string[] {
+  const rootIndex = CHROMATIC_NOTES.indexOf(rootNote);
+  if (rootIndex === -1) return [];
+
+  // Determine chord type from symbol
+  const isMinor = chordSymbol.includes('m') && !chordSymbol.includes('maj');
+  const isDiminished = chordSymbol.includes('°') || chordSymbol.includes('dim');
+  const isAugmented = chordSymbol.includes('+') || chordSymbol.includes('aug');
+
+  let intervals: number[];
+  if (isDiminished) {
+    intervals = [0, 3, 6]; // Root, minor third, diminished fifth
+  } else if (isAugmented) {
+    intervals = [0, 4, 8]; // Root, major third, augmented fifth
+  } else if (isMinor) {
+    intervals = [0, 3, 7]; // Root, minor third, perfect fifth
+  } else {
+    intervals = [0, 4, 7]; // Root, major third, perfect fifth
+  }
+
+  return intervals.map(interval => 
+    CHROMATIC_NOTES[(rootIndex + interval) % 12]
+  );
+}
+
+export function romanNumeralToChord(roman: string, rootNote: string, scaleType: string): string {
+  const degree = ROMAN_NUMERALS[roman as keyof typeof ROMAN_NUMERALS];
+  if (degree === undefined) return '';
+
+  try {
+    const musicTheory = require('./music-theory');
+    const scale = musicTheory.SCALES[scaleType];
+    if (!scale) return '';
+
+    const rootIndex = CHROMATIC_NOTES.indexOf(rootNote);
+    if (rootIndex === -1) return '';
+
+    const scaleNotes = scale.intervals.map((interval: number) => 
+      CHROMATIC_NOTES[(rootIndex + interval) % 12]
+    );
+
+    const chordRoot = scaleNotes[degree];
+    const isMinor = roman === roman.toLowerCase() || roman.includes('i');
+    const isDiminished = roman.includes('°');
+
+    let symbol = chordRoot;
+    if (isDiminished) {
+      symbol += '°';
+    } else if (isMinor) {
+      symbol += 'm';
+    }
+
+    return symbol;
+  } catch (error) {
+    console.error('Error converting roman numeral to chord:', error);
+    return '';
+  }
+}
