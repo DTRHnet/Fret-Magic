@@ -9,6 +9,7 @@ import CustomTuning from "@/components/custom-tuning";
 import Fretboard from "@/components/fretboard";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ExternalLink } from "lucide-react";
 import { exportToPNG, exportToPDF, createExportMetadata } from "@/lib/export";
 import { SCALES } from "@/lib/music-theory";
 import { TUNING_PRESETS } from "@/lib/guitar-data";
@@ -112,6 +113,15 @@ export default function Home() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.open('https://dtrh.net', '_blank')}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                dtrh.net
+              </Button>
             </div>
           </div>
         </div>
@@ -184,6 +194,15 @@ export default function Home() {
           
         </div>
       </div>
+      
+      {/* Footer */}
+      <footer className="bg-slate-100 border-t border-slate-200 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-sm text-slate-600">
+            &lt; A DTRH.NET PROJECT - KBS (admin@dtrh.net) 2025 &gt;
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
