@@ -226,16 +226,7 @@ export default function TuningHelper({ guitarType, tuning }: TuningHelperProps) 
           </div>
         </div>
 
-        {/* Instructions */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">How to use:</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Click "Play" for each string to hear the target pitch</li>
-            <li>• Tune your guitar string to match the played note</li>
-            <li>• Use "Play All" to hear all strings in sequence</li>
-            <li>• Adjust volume or mute as needed</li>
-          </ul>
-        </div>
+
       </CardContent>
     </Card>
   );

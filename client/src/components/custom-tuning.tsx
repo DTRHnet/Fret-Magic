@@ -170,16 +170,7 @@ export default function CustomTuning({ guitarType, tuning, setTuning }: CustomTu
           </div>
         </div>
 
-        {/* Instructions */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">How to use:</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Use ↑/↓ buttons to adjust each string by half steps</li>
-            <li>• Click Play to hear the current tuning for each string</li>
-            <li>• Changes are applied immediately to the fretboard</li>
-            <li>• Click "Reset to Standard" to return to standard tuning</li>
-          </ul>
-        </div>
+
       </CardContent>
     </Card>
   );
