@@ -38,14 +38,24 @@ export async function exportToPNG(
     title.style.color = '#1e293b';
     
     const metadataDiv = document.createElement('div');
-    metadataDiv.innerHTML = `
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; font-size: 14px; color: #64748b;">
-        <div><strong>Guitar:</strong> ${metadata.guitarType}-string</div>
-        <div><strong>Scale:</strong> ${metadata.scaleName}</div>
-        <div><strong>Root Note:</strong> ${metadata.rootNote}</div>
-        <div><strong>Tuning:</strong> ${metadata.tuning.join(' - ')}</div>
-      </div>
-    `;
+    const gridDiv = document.createElement('div');
+    gridDiv.style.cssText = 'display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; font-size: 14px; color: #64748b;';
+    
+    const createMetadataItem = (label: string, value: string) => {
+      const div = document.createElement('div');
+      const strong = document.createElement('strong');
+      strong.textContent = `${label}: `;
+      div.appendChild(strong);
+      div.appendChild(document.createTextNode(value));
+      return div;
+    };
+    
+    gridDiv.appendChild(createMetadataItem('Guitar', `${metadata.guitarType}-string`));
+    gridDiv.appendChild(createMetadataItem('Scale', metadata.scaleName));
+    gridDiv.appendChild(createMetadataItem('Root Note', metadata.rootNote));
+    gridDiv.appendChild(createMetadataItem('Tuning', metadata.tuning.join(' - ')));
+    
+    metadataDiv.appendChild(gridDiv);
 
     // Clone the fretboard element
     const fretboardClone = element.cloneNode(true) as HTMLElement;
@@ -118,16 +128,26 @@ export async function exportToPDF(
     title.style.color = '#1e293b';
     
     const metadataDiv = document.createElement('div');
-    metadataDiv.innerHTML = `
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; font-size: 14px; color: #64748b;">
-        <div><strong>Guitar:</strong> ${metadata.guitarType}-string</div>
-        <div><strong>Scale:</strong> ${metadata.scaleName}</div>
-        <div><strong>Root Note:</strong> ${metadata.rootNote}</div>
-        <div><strong>Tuning:</strong> ${metadata.tuning.join(' - ')}</div>
-        <div><strong>Exported:</strong> ${metadata.timestamp}</div>
-        <div><strong>Created with:</strong> FretMagic</div>
-      </div>
-    `;
+    const gridDiv = document.createElement('div');
+    gridDiv.style.cssText = 'display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; font-size: 14px; color: #64748b;';
+    
+    const createMetadataItem = (label: string, value: string) => {
+      const div = document.createElement('div');
+      const strong = document.createElement('strong');
+      strong.textContent = `${label}: `;
+      div.appendChild(strong);
+      div.appendChild(document.createTextNode(value));
+      return div;
+    };
+    
+    gridDiv.appendChild(createMetadataItem('Guitar', `${metadata.guitarType}-string`));
+    gridDiv.appendChild(createMetadataItem('Scale', metadata.scaleName));
+    gridDiv.appendChild(createMetadataItem('Root Note', metadata.rootNote));
+    gridDiv.appendChild(createMetadataItem('Tuning', metadata.tuning.join(' - ')));
+    gridDiv.appendChild(createMetadataItem('Exported', metadata.timestamp));
+    gridDiv.appendChild(createMetadataItem('Created with', 'FretMagic'));
+    
+    metadataDiv.appendChild(gridDiv);
 
     // Clone the fretboard element
     const fretboardClone = element.cloneNode(true) as HTMLElement;
