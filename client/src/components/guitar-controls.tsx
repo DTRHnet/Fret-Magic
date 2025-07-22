@@ -11,13 +11,17 @@ interface GuitarControlsProps {
   setGuitarType: (type: number) => void;
   tuning: string[];
   setTuning: (tuning: string[]) => void;
+  onCustomSelected?: () => void;
+  onPresetSelected?: () => void;
 }
 
 export default function GuitarControls({
   guitarType,
   setGuitarType,
   tuning,
-  setTuning
+  setTuning,
+  onCustomSelected,
+  onPresetSelected
 }: GuitarControlsProps) {
   const currentPreset = Object.entries(TUNING_PRESETS).find(
     ([_, preset]) => 
@@ -26,7 +30,19 @@ export default function GuitarControls({
   )?.[0] || "custom";
 
   const handlePresetChange = (presetName: string) => {
-    if (presetName !== "custom" && TUNING_PRESETS[presetName]) {
+    if (presetName === "custom") {
+      onCustomSelected?.();
+      // Initialize with standard tuning if no tuning is set
+      if (tuning.length === 0 || tuning.every(note => !note)) {
+        const standardPresets = Object.entries(TUNING_PRESETS).filter(
+          ([_, preset]) => preset.strings === guitarType && preset.name.includes("Standard")
+        );
+        if (standardPresets.length > 0) {
+          setTuning([...standardPresets[0][1].tuning]);
+        }
+      }
+    } else if (TUNING_PRESETS[presetName]) {
+      onPresetSelected?.();
       const preset = TUNING_PRESETS[presetName];
       setGuitarType(preset.strings);
       setTuning([...preset.tuning]);

@@ -14,6 +14,8 @@ import { SCALES } from "@/lib/music-theory";
 import { TUNING_PRESETS } from "@/lib/guitar-data";
 
 export default function Home() {
+  const [forceCustomTuning, setForceCustomTuning] = useState(false);
+  
   const {
     guitarType,
     setGuitarType,
@@ -34,10 +36,12 @@ export default function Home() {
   } = useFretboard();
 
   // Determine if current tuning is custom
-  const isCustomTuning = !Object.entries(TUNING_PRESETS).some(([_, preset]) => 
+  const currentPreset = Object.entries(TUNING_PRESETS).find(([_, preset]) => 
     preset.strings === guitarType && 
     JSON.stringify(preset.tuning) === JSON.stringify(tuning.slice(0, guitarType))
-  );
+  )?.[0];
+  
+  const isCustomTuning = !currentPreset || forceCustomTuning;
 
   const handleExportPNG = async () => {
     try {
@@ -122,6 +126,8 @@ export default function Home() {
               setGuitarType={setGuitarType}
               tuning={tuning}
               setTuning={setTuning}
+              onCustomSelected={() => setForceCustomTuning(true)}
+              onPresetSelected={() => setForceCustomTuning(false)}
             />
             
             <ScaleControls
