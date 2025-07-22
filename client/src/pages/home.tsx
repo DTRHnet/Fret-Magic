@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { exportToPNG, exportToPDF, createExportMetadata } from "@/lib/export";
 import { SCALES } from "@/lib/music-theory";
 import { TUNING_PRESETS } from "@/lib/guitar-data";
+import ChordShapes from "@/components/chord-shapes";
 
 export default function Home() {
   const [forceCustomTuning, setForceCustomTuning] = useState(false);
@@ -158,6 +159,12 @@ export default function Home() {
                 tuning={tuning}
               />
             )}
+
+            <ChordShapes
+              rootNote={rootNote}
+              scaleType={scaleType}
+              currentScale={currentScale}
+            />
           </div>
           
           {/* Main Fretboard */}

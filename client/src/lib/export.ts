@@ -16,10 +16,14 @@ export async function exportToPNG(
   filename?: string
 ): Promise<void> {
   try {
+    console.log('Attempting to export PNG for element:', elementId);
     const element = document.getElementById(elementId);
     if (!element) {
+      console.error(`Element with id '${elementId}' not found`);
       throw new Error(`Element with id '${elementId}' not found`);
     }
+    
+    console.log('Element found:', element);
 
     // Create a container with metadata
     const container = document.createElement('div');
@@ -53,25 +57,33 @@ export async function exportToPNG(
     
     // Temporarily add to document
     container.style.position = 'absolute';
-    container.style.left = '-9999px';
+    container.style.top = '-10000px';
+    container.style.left = '0';
     document.body.appendChild(container);
 
-    // Generate canvas
+    // Generate the canvas
     const canvas = await html2canvas(container, {
       backgroundColor: '#ffffff',
       scale: 2,
-      useCORS: true
+      logging: false,
+      useCORS: true,
+      allowTaint: true
     });
 
-    // Remove temporary element
+    // Remove the temporary container
     document.body.removeChild(container);
 
-    // Download
+    // Create download link
     const link = document.createElement('a');
-    link.download = filename || `fretmagic-${metadata.scaleType}-${metadata.rootNote}-${Date.now()}.png`;
-    link.href = canvas.toDataURL();
-    link.click();
+    link.download = filename || `fretmagic-${metadata.guitarType}string-${metadata.rootNote}-${metadata.scaleType}-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
     
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log('PNG export completed successfully');
   } catch (error) {
     console.error('PNG export failed:', error);
     throw error;
@@ -79,61 +91,97 @@ export async function exportToPNG(
 }
 
 export async function exportToPDF(
-  elementId: string,
+  elementId: string, 
   metadata: ExportMetadata,
   filename?: string
 ): Promise<void> {
   try {
+    console.log('Attempting to export PDF for element:', elementId);
     const element = document.getElementById(elementId);
     if (!element) {
+      console.error(`Element with id '${elementId}' not found`);
       throw new Error(`Element with id '${elementId}' not found`);
     }
 
-    // Create PDF
-    const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    console.log('Element found:', element);
 
-    // Add title
-    pdf.setFontSize(20);
-    pdf.setTextColor(30, 41, 59); // slate-800
-    pdf.text('FretMagic - Guitar Scale Explorer', 20, 25);
+    // Create a container with metadata
+    const container = document.createElement('div');
+    container.style.background = 'white';
+    container.style.padding = '20px';
+    container.style.fontFamily = 'Arial, sans-serif';
 
-    // Add metadata
-    pdf.setFontSize(12);
-    pdf.setTextColor(100, 116, 139); // slate-500
+    // Add title and metadata
+    const title = document.createElement('h2');
+    title.textContent = 'FretMagic - Guitar Scale Explorer';
+    title.style.margin = '0 0 15px 0';
+    title.style.color = '#1e293b';
     
-    const metadataLines = [
-      `Guitar: ${metadata.guitarType}-string`,
-      `Scale: ${metadata.scaleName}`,
-      `Root Note: ${metadata.rootNote}`,
-      `Tuning: ${metadata.tuning.join(' - ')}`,
-      `Generated: ${metadata.timestamp}`
-    ];
+    const metadataDiv = document.createElement('div');
+    metadataDiv.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; font-size: 14px; color: #64748b;">
+        <div><strong>Guitar:</strong> ${metadata.guitarType}-string</div>
+        <div><strong>Scale:</strong> ${metadata.scaleName}</div>
+        <div><strong>Root Note:</strong> ${metadata.rootNote}</div>
+        <div><strong>Tuning:</strong> ${metadata.tuning.join(' - ')}</div>
+        <div><strong>Exported:</strong> ${metadata.timestamp}</div>
+        <div><strong>Created with:</strong> FretMagic</div>
+      </div>
+    `;
 
-    metadataLines.forEach((line, index) => {
-      pdf.text(line, 20, 40 + (index * 7));
-    });
+    // Clone the fretboard element
+    const fretboardClone = element.cloneNode(true) as HTMLElement;
+    
+    // Assemble the export container
+    container.appendChild(title);
+    container.appendChild(metadataDiv);
+    container.appendChild(fretboardClone);
+    
+    // Temporarily add to document
+    container.style.position = 'absolute';
+    container.style.top = '-10000px';
+    container.style.left = '0';
+    document.body.appendChild(container);
 
-    // Capture fretboard as image
-    const canvas = await html2canvas(element, {
+    // Generate the canvas
+    const canvas = await html2canvas(container, {
       backgroundColor: '#ffffff',
       scale: 2,
-      useCORS: true
+      logging: false,
+      useCORS: true,
+      allowTaint: true
     });
 
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = pageWidth - 40; // 20mm margins
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    // Remove the temporary container
+    document.body.removeChild(container);
 
-    // Add fretboard image
-    const yPosition = Math.max(85, pageHeight - imgHeight - 20);
-    pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
+    // Create PDF
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF();
+    
+    // Calculate dimensions to fit the page
+    const imgWidth = 210; // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Add extra pages if needed
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
 
     // Save PDF
-    const pdfFilename = filename || `fretmagic-${metadata.scaleType}-${metadata.rootNote}-${Date.now()}.pdf`;
-    pdf.save(pdfFilename);
+    pdf.save(filename || `fretmagic-${metadata.guitarType}string-${metadata.rootNote}-${metadata.scaleType}-${Date.now()}.pdf`);
     
+    console.log('PDF export completed successfully');
   } catch (error) {
     console.error('PDF export failed:', error);
     throw error;

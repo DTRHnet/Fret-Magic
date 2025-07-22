@@ -1,206 +1,329 @@
-import { getNoteIndex, getNoteAtIndex, getScaleNotes } from "./music-theory";
-
-export interface ChordPattern {
+// Chord library with fingering patterns and theory
+export interface ChordShape {
   name: string;
+  fingering: (number | 'x')[];
+  barres?: { fret: number; fromString: number; toString: number }[];
+  baseFret: number;
+  fingers: (number | 0)[];
+}
+
+export interface ChordProgression {
+  chordName: string;
+  rootNote: string;
   intervals: number[];
-  symbol: string;
+  shapes: ChordShape[];
 }
 
-export interface DetectedChord {
-  name: string;
-  symbol: string;
-  notes: string[];
-  positions: Array<{ string: number; fret: number }>;
-  quality: "major" | "minor" | "diminished" | "augmented" | "dominant" | "other";
+// Common chord patterns for different scale degrees
+const CHORD_PATTERNS: Record<string, number[][]> = {
+  // Major scale chord patterns (triads and 7ths)
+  major: [
+    [0, 4, 7],       // I (major)
+    [0, 3, 7],       // ii (minor)
+    [0, 3, 7],       // iii (minor)
+    [0, 4, 7],       // IV (major)
+    [0, 4, 7],       // V (major)
+    [0, 3, 7],       // vi (minor)
+    [0, 3, 6],       // vii° (diminished)
+  ],
+  minor: [
+    [0, 3, 7],       // i (minor)
+    [0, 3, 6],       // ii° (diminished)
+    [0, 4, 7],       // III (major)
+    [0, 3, 7],       // iv (minor)
+    [0, 3, 7],       // v (minor)
+    [0, 4, 7],       // VI (major)
+    [0, 4, 7],       // VII (major)
+  ]
+};
+
+// Basic chord shapes for 6-string guitar
+const BASIC_SHAPES: Record<string, ChordShape[]> = {
+  'C': [
+    {
+      name: 'C Major Open',
+      fingering: ['x', 3, 2, 0, 1, 0],
+      baseFret: 0,
+      fingers: [0, 3, 2, 0, 1, 0]
+    },
+    {
+      name: 'C Major Barre (3rd fret)',
+      fingering: [3, 3, 5, 5, 5, 3],
+      barres: [{ fret: 3, fromString: 0, toString: 5 }],
+      baseFret: 0,
+      fingers: [1, 1, 3, 4, 4, 1]
+    }
+  ],
+  'D': [
+    {
+      name: 'D Major Open',
+      fingering: ['x', 'x', 0, 2, 3, 2],
+      baseFret: 0,
+      fingers: [0, 0, 0, 1, 3, 2]
+    },
+    {
+      name: 'D Major Barre (5th fret)',
+      fingering: [5, 5, 7, 7, 7, 5],
+      barres: [{ fret: 5, fromString: 0, toString: 5 }],
+      baseFret: 0,
+      fingers: [1, 1, 3, 4, 4, 1]
+    }
+  ],
+  'E': [
+    {
+      name: 'E Major Open',
+      fingering: [0, 2, 2, 1, 0, 0],
+      baseFret: 0,
+      fingers: [0, 2, 3, 1, 0, 0]
+    }
+  ],
+  'F': [
+    {
+      name: 'F Major Barre (1st fret)',
+      fingering: [1, 1, 3, 3, 3, 1],
+      barres: [{ fret: 1, fromString: 0, toString: 5 }],
+      baseFret: 0,
+      fingers: [1, 1, 3, 4, 4, 1]
+    }
+  ],
+  'G': [
+    {
+      name: 'G Major Open',
+      fingering: [3, 2, 0, 0, 0, 3],
+      baseFret: 0,
+      fingers: [3, 2, 0, 0, 0, 4]
+    },
+    {
+      name: 'G Major Barre (3rd fret)',
+      fingering: [3, 3, 5, 5, 5, 3],
+      barres: [{ fret: 3, fromString: 0, toString: 5 }],
+      baseFret: 0,
+      fingers: [1, 1, 3, 4, 4, 1]
+    }
+  ],
+  'A': [
+    {
+      name: 'A Major Open',
+      fingering: ['x', 0, 2, 2, 2, 0],
+      baseFret: 0,
+      fingers: [0, 0, 1, 2, 3, 0]
+    }
+  ],
+  'B': [
+    {
+      name: 'B Major Barre (2nd fret)',
+      fingering: [2, 2, 4, 4, 4, 2],
+      barres: [{ fret: 2, fromString: 0, toString: 5 }],
+      baseFret: 0,
+      fingers: [1, 1, 3, 4, 4, 1]
+    }
+  ]
+};
+
+// Minor chord shapes
+const MINOR_SHAPES: Record<string, ChordShape[]> = {
+  'Am': [
+    {
+      name: 'A Minor Open',
+      fingering: ['x', 0, 2, 2, 1, 0],
+      baseFret: 0,
+      fingers: [0, 0, 2, 3, 1, 0]
+    }
+  ],
+  'Dm': [
+    {
+      name: 'D Minor Open',
+      fingering: ['x', 'x', 0, 2, 3, 1],
+      baseFret: 0,
+      fingers: [0, 0, 0, 1, 3, 2]
+    }
+  ],
+  'Em': [
+    {
+      name: 'E Minor Open',
+      fingering: [0, 2, 2, 0, 0, 0],
+      baseFret: 0,
+      fingers: [0, 2, 3, 0, 0, 0]
+    }
+  ]
+};
+
+const CHROMATIC_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function transposeChordShape(baseShape: ChordShape, semitones: number): ChordShape {
+  return {
+    ...baseShape,
+    name: baseShape.name.replace(/\d+(st|nd|rd|th)/, (match) => {
+      const num = parseInt(match);
+      return `${num + semitones}${getOrdinalSuffix(num + semitones)}`;
+    }),
+    fingering: baseShape.fingering.map(fret => 
+      fret === 'x' || fret === 0 ? fret : (fret as number) + semitones
+    ),
+    barres: baseShape.barres?.map(barre => ({
+      ...barre,
+      fret: barre.fret + semitones
+    })),
+    baseFret: baseShape.baseFret + semitones
+  };
 }
 
-// Common chord patterns
-export const CHORD_PATTERNS: ChordPattern[] = [
-  { name: "Major", intervals: [0, 4, 7], symbol: "" },
-  { name: "Minor", intervals: [0, 3, 7], symbol: "m" },
-  { name: "Diminished", intervals: [0, 3, 6], symbol: "dim" },
-  { name: "Augmented", intervals: [0, 4, 8], symbol: "aug" },
-  { name: "Major 7th", intervals: [0, 4, 7, 11], symbol: "maj7" },
-  { name: "Minor 7th", intervals: [0, 3, 7, 10], symbol: "m7" },
-  { name: "Dominant 7th", intervals: [0, 4, 7, 10], symbol: "7" },
-  { name: "Minor Major 7th", intervals: [0, 3, 7, 11], symbol: "m(maj7)" },
-  { name: "Half Diminished 7th", intervals: [0, 3, 6, 10], symbol: "m7b5" },
-  { name: "Diminished 7th", intervals: [0, 3, 6, 9], symbol: "dim7" },
-  { name: "Suspended 2nd", intervals: [0, 2, 7], symbol: "sus2" },
-  { name: "Suspended 4th", intervals: [0, 5, 7], symbol: "sus4" },
-  { name: "Add 9", intervals: [0, 4, 7, 14], symbol: "add9" },
-  { name: "Major 9th", intervals: [0, 4, 7, 11, 14], symbol: "maj9" },
-  { name: "Minor 9th", intervals: [0, 3, 7, 10, 14], symbol: "m9" },
-  { name: "Dominant 9th", intervals: [0, 4, 7, 10, 14], symbol: "9" },
-  { name: "Power Chord", intervals: [0, 7], symbol: "5" },
-  { name: "Major 6th", intervals: [0, 4, 7, 9], symbol: "6" },
-  { name: "Minor 6th", intervals: [0, 3, 7, 9], symbol: "m6" }
-];
-
-export function normalizeIntervals(intervals: number[]): number[] {
-  return intervals.map(interval => interval % 12).sort((a, b) => a - b);
+function getOrdinalSuffix(num: number): string {
+  const j = num % 10;
+  const k = num % 100;
+  if (j === 1 && k !== 11) return 'st';
+  if (j === 2 && k !== 12) return 'nd';
+  if (j === 3 && k !== 13) return 'rd';
+  return 'th';
 }
 
-export function findChordPattern(intervals: number[]): ChordPattern | null {
-  const normalized = normalizeIntervals(intervals);
-  
-  for (const pattern of CHORD_PATTERNS) {
-    const patternNormalized = normalizeIntervals(pattern.intervals);
+export function generateChordsForScale(rootNote: string, scaleIntervals: number[]): ChordProgression[] {
+  const rootIndex = CHROMATIC_NOTES.indexOf(rootNote);
+  if (rootIndex === -1) return [];
+
+  const scaleNotes = scaleIntervals.map(interval => 
+    CHROMATIC_NOTES[(rootIndex + interval) % 12]
+  );
+
+  const chordProgressions: ChordProgression[] = [];
+
+  // Generate triads for each scale degree
+  scaleIntervals.forEach((_, degree) => {
+    const chordRoot = scaleNotes[degree];
+    const chordRootIndex = CHROMATIC_NOTES.indexOf(chordRoot);
     
-    if (normalized.length === patternNormalized.length &&
-        normalized.every((interval, index) => interval === patternNormalized[index])) {
-      return pattern;
+    // Build chord intervals (root, third, fifth)
+    const thirdDegree = (degree + 2) % scaleNotes.length;
+    const fifthDegree = (degree + 4) % scaleNotes.length;
+    
+    const thirdNote = scaleNotes[thirdDegree];
+    const fifthNote = scaleNotes[fifthDegree];
+    
+    const thirdInterval = (CHROMATIC_NOTES.indexOf(thirdNote) - chordRootIndex + 12) % 12;
+    const fifthInterval = (CHROMATIC_NOTES.indexOf(fifthNote) - chordRootIndex + 12) % 12;
+    
+    const intervals = [0, thirdInterval, fifthInterval];
+    
+    // Determine chord quality
+    const isMinor = thirdInterval === 3;
+    const isDiminished = thirdInterval === 3 && fifthInterval === 6;
+    
+    let chordName = chordRoot;
+    if (isDiminished) chordName += '°';
+    else if (isMinor) chordName += 'm';
+    
+    // Get base shapes and transpose them
+    const baseShapes = isMinor && MINOR_SHAPES[chordRoot + 'm'] 
+      ? MINOR_SHAPES[chordRoot + 'm']
+      : BASIC_SHAPES[chordRoot] || [];
+    
+    let shapes: ChordShape[] = [];
+    
+    if (baseShapes.length > 0) {
+      shapes = baseShapes;
+    } else {
+      // Generate transposed shapes from C major or A minor
+      const referenceShapes = isMinor ? MINOR_SHAPES['Am'] || [] : BASIC_SHAPES['C'] || [];
+      const referenceSemitones = isMinor ? 9 : 0; // A=9, C=0
+      const targetSemitones = chordRootIndex;
+      const transposeSemitones = (targetSemitones - referenceSemitones + 12) % 12;
+      
+      shapes = referenceShapes.map(shape => transposeChordShape(shape, transposeSemitones));
     }
-  }
-  
-  return null;
+
+    chordProgressions.push({
+      chordName,
+      rootNote: chordRoot,
+      intervals,
+      shapes: shapes.slice(0, 2) // Limit to 2 shapes per chord
+    });
+  });
+
+  return chordProgressions;
 }
 
-export function detectChordsInScale(rootNote: string, scaleType: string, tuning: string[], maxFrets: number = 12): DetectedChord[] {
-  const scaleNotes = getScaleNotes(rootNote, scaleType);
-  const scaleNoteIndices = scaleNotes.map(note => getNoteIndex(note));
-  const detectedChords: DetectedChord[] = [];
+export function renderChordDiagram(shape: ChordShape, size: number = 120): string {
+  const frets = 5;
+  const strings = 6;
+  const fretHeight = size / (frets + 1);
+  const stringSpacing = size / (strings + 1);
+  const dotRadius = stringSpacing / 6;
+  
+  let svg = `
+    <svg width="${size}" height="${size * 1.2}" viewBox="0 0 ${size} ${size * 1.2}" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background -->
+      <rect width="${size}" height="${size * 1.2}" fill="white" stroke="none"/>
+      
+      <!-- Title -->
+      <text x="${size/2}" y="${fretHeight/2}" text-anchor="middle" font-family="Arial" font-size="${size/12}" font-weight="bold" fill="#333">
+        ${shape.name}
+      </text>
+  `;
 
-  // Check common chord positions across fretboard
-  for (let baseFret = 0; baseFret <= maxFrets - 4; baseFret++) {
-    // Check major barre chord shapes
-    const barreShapes = [
-      // E-shape barre chord (6th string root)
-      { strings: [0, 2, 2, 1, 0, 0], name: "E-shape" },
-      // A-shape barre chord (5th string root)
-      { strings: [-1, 0, 2, 2, 2, 0], name: "A-shape" },
-      // Open position chords
-      { strings: [0, 0, 2, 2, 2, 0], name: "Open A" },
-      { strings: [0, 2, 2, 1, 0, 0], name: "Open E" },
-      { strings: [-1, -1, 0, 2, 3, 2], name: "Open D" },
-      { strings: [3, 2, 0, 0, 0, 3], name: "Open G" },
-      { strings: [-1, 3, 2, 0, 1, 0], name: "Open C" }
-    ];
+  // Draw strings (vertical lines)
+  for (let string = 0; string < strings; string++) {
+    const x = stringSpacing * (string + 1);
+    svg += `<line x1="${x}" y1="${fretHeight}" x2="${x}" y2="${fretHeight * (frets + 1)}" stroke="#666" stroke-width="1"/>`;
+  }
 
-    for (const shape of barreShapes) {
-      if (shape.strings.length > tuning.length) continue;
+  // Draw frets (horizontal lines)
+  for (let fret = 0; fret <= frets; fret++) {
+    const y = fretHeight * (fret + 1);
+    const strokeWidth = fret === 0 ? 3 : 1; // Nut is thicker
+    svg += `<line x1="${stringSpacing}" y1="${y}" x2="${stringSpacing * strings}" y2="${y}" stroke="#333" stroke-width="${strokeWidth}"/>`;
+  }
 
-      const chordNotes: string[] = [];
-      const positions: Array<{ string: number; fret: number }> = [];
+  // Draw fret numbers
+  if (shape.baseFret > 0) {
+    svg += `<text x="${stringSpacing/2}" y="${fretHeight * 1.5}" text-anchor="middle" font-family="Arial" font-size="${size/15}" fill="#666">
+      ${shape.baseFret + 1}
+    </text>`;
+  }
 
-      // Calculate notes for this chord shape
-      for (let stringIndex = 0; stringIndex < Math.min(shape.strings.length, tuning.length); stringIndex++) {
-        const fretOffset = shape.strings[stringIndex];
-        if (fretOffset === -1) continue; // Muted string
+  // Draw barres
+  if (shape.barres) {
+    shape.barres.forEach(barre => {
+      const fretY = fretHeight * (barre.fret - shape.baseFret + 1.5);
+      const startX = stringSpacing * (strings - barre.toString);
+      const endX = stringSpacing * (strings - barre.fromString);
+      
+      svg += `<line x1="${startX}" y1="${fretY}" x2="${endX}" y2="${fretY}" stroke="#333" stroke-width="${dotRadius * 2}" stroke-linecap="round"/>`;
+    });
+  }
 
-        const actualFret = baseFret + fretOffset;
-        if (actualFret > maxFrets) continue;
-
-        const openNoteIndex = getNoteIndex(tuning[stringIndex]);
-        const noteIndex = (openNoteIndex + actualFret) % 12;
-        const note = getNoteAtIndex(noteIndex);
-
-        // Only include notes that are in the current scale
-        if (scaleNoteIndices.includes(noteIndex)) {
-          chordNotes.push(note);
-          positions.push({ string: stringIndex, fret: actualFret });
-        }
-      }
-
-      // Need at least 3 notes for a chord
-      if (chordNotes.length >= 3) {
-        // Remove duplicates but keep track of the lowest instance for root detection
-        const uniqueNotes = [...new Set(chordNotes)];
-        
-        if (uniqueNotes.length >= 3) {
-          // Determine the root note (usually the lowest/bass note)
-          const bassNote = chordNotes[0];
-          const bassNoteIndex = getNoteIndex(bassNote);
-
-          // Calculate intervals from the bass note
-          const intervals = uniqueNotes.map(note => {
-            const noteIndex = getNoteIndex(note);
-            return (noteIndex - bassNoteIndex + 12) % 12;
-          }).sort((a, b) => a - b);
-
-          // Find matching chord pattern
-          const pattern = findChordPattern(intervals);
-          
-          if (pattern && scaleNoteIndices.includes(bassNoteIndex)) {
-            const chordName = `${bassNote}${pattern.symbol}`;
-            
-            // Determine chord quality
-            let quality: DetectedChord["quality"] = "other";
-            if (pattern.symbol === "" || pattern.symbol.includes("maj")) quality = "major";
-            else if (pattern.symbol.includes("m") && !pattern.symbol.includes("maj")) quality = "minor";
-            else if (pattern.symbol.includes("dim")) quality = "diminished";
-            else if (pattern.symbol.includes("aug")) quality = "augmented";
-            else if (pattern.symbol.includes("7") && !pattern.symbol.includes("maj")) quality = "dominant";
-
-            // Check if this chord is already detected (avoid duplicates)
-            const exists = detectedChords.some(chord => 
-              chord.name === chordName && 
-              chord.positions.length === positions.length &&
-              chord.positions.every((pos, idx) => 
-                positions[idx] && pos.string === positions[idx].string && pos.fret === positions[idx].fret
-              )
-            );
-
-            if (!exists) {
-              detectedChords.push({
-                name: chordName,
-                symbol: pattern.symbol,
-                notes: uniqueNotes,
-                positions,
-                quality
-              });
-            }
-          }
-        }
+  // Draw fingering dots and mutes
+  shape.fingering.forEach((fret, string) => {
+    const x = stringSpacing * (strings - string);
+    
+    if (fret === 'x') {
+      // Draw X for muted strings
+      const y = fretHeight * 0.7;
+      const size = dotRadius;
+      svg += `
+        <line x1="${x - size}" y1="${y - size}" x2="${x + size}" y2="${y + size}" stroke="#d00" stroke-width="2"/>
+        <line x1="${x - size}" y1="${y + size}" x2="${x + size}" y2="${y - size}" stroke="#d00" stroke-width="2"/>
+      `;
+    } else if (fret === 0) {
+      // Draw O for open strings
+      const y = fretHeight * 0.7;
+      svg += `<circle cx="${x}" cy="${y}" r="${dotRadius}" fill="white" stroke="#333" stroke-width="2"/>`;
+    } else {
+      // Draw finger position dot
+      const adjustedFret = (fret as number) - shape.baseFret;
+      const y = fretHeight * (adjustedFret + 1.5);
+      const fingerNum = shape.fingers[string];
+      
+      svg += `<circle cx="${x}" cy="${y}" r="${dotRadius}" fill="#333"/>`;
+      
+      // Add finger number
+      if (fingerNum > 0) {
+        svg += `<text x="${x}" y="${y + dotRadius/3}" text-anchor="middle" font-family="Arial" font-size="${size/20}" fill="white" font-weight="bold">
+          ${fingerNum}
+        </text>`;
       }
     }
-  }
+  });
 
-  // Sort by chord complexity (simpler chords first)
-  return detectedChords
-    .sort((a, b) => {
-      // Prioritize by chord quality (major, minor, then others)
-      const qualityOrder = { major: 0, minor: 1, dominant: 2, diminished: 3, augmented: 4, other: 5 };
-      const qualityDiff = qualityOrder[a.quality] - qualityOrder[b.quality];
-      if (qualityDiff !== 0) return qualityDiff;
-      
-      // Then by number of notes (simpler first)
-      const notesDiff = a.notes.length - b.notes.length;
-      if (notesDiff !== 0) return notesDiff;
-      
-      // Finally by name
-      return a.name.localeCompare(b.name);
-    })
-    .slice(0, 12); // Limit to 12 most relevant chords
-}
-
-export function getCommonChordsInKey(rootNote: string, scaleType: string): string[] {
-  const scaleNotes = getScaleNotes(rootNote, scaleType);
-  
-  if (scaleType === "ionian" || scaleType === "major") {
-    // Major scale chord progression: I, ii, iii, IV, V, vi, vii°
-    return [
-      `${scaleNotes[0]}`,           // I (major)
-      `${scaleNotes[1]}m`,          // ii (minor)
-      `${scaleNotes[2]}m`,          // iii (minor)
-      `${scaleNotes[3]}`,           // IV (major)
-      `${scaleNotes[4]}`,           // V (major)
-      `${scaleNotes[5]}m`,          // vi (minor)
-      `${scaleNotes[6]}dim`         // vii° (diminished)
-    ];
-  } else if (scaleType === "aeolian" || scaleType === "minor") {
-    // Natural minor scale chord progression: i, ii°, III, iv, v, VI, VII
-    return [
-      `${scaleNotes[0]}m`,          // i (minor)
-      `${scaleNotes[1]}dim`,        // ii° (diminished)
-      `${scaleNotes[2]}`,           // III (major)
-      `${scaleNotes[3]}m`,          // iv (minor)
-      `${scaleNotes[4]}m`,          // v (minor)
-      `${scaleNotes[5]}`,           // VI (major)
-      `${scaleNotes[6]}`            // VII (major)
-    ];
-  }
-  
-  // For other scales, return basic triads
-  return scaleNotes.slice(0, 4).map(note => note);
+  svg += '</svg>';
+  return svg;
 }
