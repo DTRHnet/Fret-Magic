@@ -145,11 +145,6 @@ export default function ScaleControls({
               </SelectContent>
             </Select>
           </div>
-          
-          <Button className="w-full" variant="default">
-            <Play className="w-4 h-4 mr-2" />
-            Generate Scale
-          </Button>
         </div>
       </CardContent>
     </Card>
