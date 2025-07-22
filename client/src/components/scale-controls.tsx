@@ -53,7 +53,7 @@ export default function ScaleControls({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-80">
                 <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   Major Scale Modes
                 </div>
@@ -76,6 +76,62 @@ export default function ScaleControls({
                     </SelectItem>
                   ))}
                 
+                <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  Jazz Scales
+                </div>
+                {Object.entries(SCALES)
+                  .filter(([_, scale]) => scale.category === "jazz")
+                  .map(([key, scale]) => (
+                    <SelectItem key={key} value={key}>
+                      {scale.name}
+                    </SelectItem>
+                  ))}
+                
+                <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  World Music
+                </div>
+                {Object.entries(SCALES)
+                  .filter(([_, scale]) => scale.category === "world")
+                  .map(([key, scale]) => (
+                    <SelectItem key={key} value={key}>
+                      {scale.name}
+                    </SelectItem>
+                  ))}
+                
+                <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  Blues Scales
+                </div>
+                {Object.entries(SCALES)
+                  .filter(([_, scale]) => scale.category === "blues")
+                  .map(([key, scale]) => (
+                    <SelectItem key={key} value={key}>
+                      {scale.name}
+                    </SelectItem>
+                  ))}
+                
+                <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  Exotic & Rare
+                </div>
+                {Object.entries(SCALES)
+                  .filter(([_, scale]) => scale.category === "exotic")
+                  .map(([key, scale]) => (
+                    <SelectItem key={key} value={key}>
+                      {scale.name}
+                    </SelectItem>
+                  ))}
+                
+                <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  Symmetrical
+                </div>
+                {Object.entries(SCALES)
+                  .filter(([_, scale]) => scale.category === "symmetrical")
+                  .map(([key, scale]) => (
+                    <SelectItem key={key} value={key}>
+                      {scale.name}
+                    </SelectItem>
+                  ))}
+                
+
                 <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   Other Scales
                 </div>

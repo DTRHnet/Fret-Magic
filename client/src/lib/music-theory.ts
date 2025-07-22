@@ -156,6 +156,152 @@ export const SCALES = {
     intervals: [0, 2, 4, 6, 7, 9, 10],
     pattern: "W-W-W-H-W-H-W",
     category: "jazz"
+  },
+  
+  // Additional Exotic and Rare Scales
+  "prometheus": {
+    name: "Prometheus",
+    intervals: [0, 2, 4, 6, 9, 10],
+    pattern: "W-W-W-WH-H-W",
+    category: "exotic"
+  },
+  "scriabin": {
+    name: "Scriabin",
+    intervals: [0, 1, 4, 7, 9, 10],
+    pattern: "H-WH-WH-W-H-W",
+    category: "exotic"
+  },
+  "tritone": {
+    name: "Tritone",
+    intervals: [0, 1, 4, 6, 7, 10],
+    pattern: "H-WH-W-H-WH-W",
+    category: "exotic"
+  },
+  "balinese": {
+    name: "Balinese Pelog",
+    intervals: [0, 1, 3, 7, 8],
+    pattern: "H-W-2W-H-2W",
+    category: "world"
+  },
+  "chinese": {
+    name: "Chinese",
+    intervals: [0, 4, 6, 7, 11],
+    pattern: "2W-W-H-2W-H",
+    category: "world"
+  },
+  "kumoi": {
+    name: "Kumoi",
+    intervals: [0, 2, 3, 7, 9],
+    pattern: "W-H-2W-W-WH",
+    category: "pentatonic"
+  },
+  "iwato": {
+    name: "Iwato",
+    intervals: [0, 1, 5, 6, 10],
+    pattern: "H-2W-H-2W-W",
+    category: "pentatonic"
+  },
+  "insen": {
+    name: "In Sen",
+    intervals: [0, 1, 5, 7, 10],
+    pattern: "H-2W-W-WH-W",
+    category: "pentatonic"
+  },
+  "yo": {
+    name: "Yo Scale",
+    intervals: [0, 2, 5, 7, 9],
+    pattern: "W-WH-W-W-WH",
+    category: "pentatonic"
+  },
+  "egyptian": {
+    name: "Egyptian Pentatonic",
+    intervals: [0, 2, 5, 7, 10],
+    pattern: "W-WH-W-WH-W",
+    category: "pentatonic"
+  },
+  "phrygian-dominant": {
+    name: "Phrygian Dominant (Spanish)",
+    intervals: [0, 1, 4, 5, 7, 8, 10],
+    pattern: "H-WH-H-W-H-W-W",
+    category: "world"
+  },
+  "persian": {
+    name: "Persian",
+    intervals: [0, 1, 4, 5, 6, 8, 11],
+    pattern: "H-WH-H-H-W-WH-H",
+    category: "world"
+  },
+  "byzantine": {
+    name: "Byzantine (Double Harmonic)",
+    intervals: [0, 1, 4, 5, 7, 8, 11],
+    pattern: "H-WH-H-W-H-WH-H",
+    category: "world"
+  },
+  "jewish": {
+    name: "Jewish (Ahava Rabbah)",
+    intervals: [0, 1, 4, 5, 7, 8, 10],
+    pattern: "H-WH-H-W-H-W-W",
+    category: "world"
+  },
+  "mongolian": {
+    name: "Mongolian",
+    intervals: [0, 2, 4, 7, 9],
+    pattern: "W-W-WH-W-WH",
+    category: "world"
+  },
+  "double-harmonic": {
+    name: "Double Harmonic Major",
+    intervals: [0, 1, 4, 5, 7, 8, 11],
+    pattern: "H-WH-H-W-H-WH-H",
+    category: "exotic"
+  },
+  "neapolitan-major": {
+    name: "Neapolitan Major",
+    intervals: [0, 1, 3, 5, 7, 9, 11],
+    pattern: "H-W-W-W-W-W-H",
+    category: "exotic"
+  },
+  "hungarian-major": {
+    name: "Hungarian Major",
+    intervals: [0, 3, 4, 6, 7, 9, 10],
+    pattern: "WH-H-W-H-W-H-W",
+    category: "exotic"
+  },
+  "oriental": {
+    name: "Oriental",
+    intervals: [0, 1, 4, 5, 6, 9, 10],
+    pattern: "H-WH-H-H-WH-H-W",
+    category: "exotic"
+  },
+  "flamenco": {
+    name: "Flamenco",
+    intervals: [0, 1, 4, 5, 7, 8, 11],
+    pattern: "H-WH-H-W-H-WH-H",
+    category: "world"
+  },
+  "blues-major": {
+    name: "Major Blues",
+    intervals: [0, 2, 3, 4, 7, 9],
+    pattern: "W-H-H-WH-W-WH",
+    category: "blues"
+  },
+  "mixolydian-blues": {
+    name: "Mixolydian Blues",
+    intervals: [0, 2, 4, 5, 6, 7, 9, 10],
+    pattern: "W-W-H-H-H-W-H-W",
+    category: "blues"
+  },
+  "dominant-diminished": {
+    name: "Dominant Diminished (Half-Whole)",
+    intervals: [0, 1, 3, 4, 6, 7, 9, 10],
+    pattern: "H-W-H-W-H-W-H-W",
+    category: "symmetrical"
+  },
+  "diminished-wh": {
+    name: "Diminished (Whole-Half)",
+    intervals: [0, 2, 3, 5, 6, 8, 9, 11],
+    pattern: "W-H-W-H-W-H-W-H",
+    category: "symmetrical"
   }
 } as const;
 

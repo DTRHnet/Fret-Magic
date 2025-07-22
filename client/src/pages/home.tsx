@@ -4,6 +4,7 @@ import { useFretboard } from "@/hooks/use-fretboard";
 import GuitarControls from "@/components/guitar-controls";
 import ScaleControls from "@/components/scale-controls";
 import DisplayControls from "@/components/display-controls";
+import TuningHelper from "@/components/tuning-helper";
 import Fretboard from "@/components/fretboard";
 
 export default function Home() {
@@ -73,6 +74,11 @@ export default function Home() {
               setFretRange={setFretRange}
               showOptions={showOptions}
               setShowOptions={setShowOptions}
+            />
+            
+            <TuningHelper
+              guitarType={guitarType}
+              tuning={tuning}
             />
           </div>
           
