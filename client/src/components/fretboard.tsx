@@ -1,6 +1,7 @@
 import { Music } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FretboardNote } from "@/lib/music-theory";
+import { audioEngine } from "@/lib/audio";
 
 interface FretboardProps {
   guitarType: number;
@@ -42,6 +43,17 @@ export default function Fretboard({
   const svgWidth = startX + (fretRange + 1) * fretWidth + 50;
   const svgHeight = startY + (guitarType - 1) * stringSpacing + 80;
 
+  const handleNoteClick = async (stringIndex: number, fretIndex: number) => {
+    try {
+      const openStringNote = tuning[stringIndex];
+      if (openStringNote) {
+        await audioEngine.playFretboardNote(openStringNote, stringIndex, fretIndex, guitarType);
+      }
+    } catch (error) {
+      console.error('Failed to play note:', error);
+    }
+  };
+
   const renderNote = (note: FretboardNote, stringIndex: number, fretIndex: number) => {
     if (!note.isInScale && !note.isRoot) return null;
     
@@ -56,7 +68,11 @@ export default function Fretboard({
     const displayText = displayMode === "notes" ? note.note : note.interval;
     
     return (
-      <g key={`${stringIndex}-${fretIndex}`} className="cursor-pointer hover:opacity-80 transition-opacity">
+      <g 
+        key={`${stringIndex}-${fretIndex}`} 
+        className="cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={() => handleNoteClick(stringIndex, fretIndex)}
+      >
         <circle
           cx={x}
           cy={y}

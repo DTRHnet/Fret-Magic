@@ -1,11 +1,17 @@
 import { useState } from "react";
-import { Guitar } from "lucide-react";
+import { Guitar, Download, FileImage, FileText } from "lucide-react";
 import { useFretboard } from "@/hooks/use-fretboard";
 import GuitarControls from "@/components/guitar-controls";
 import ScaleControls from "@/components/scale-controls";
 import DisplayControls from "@/components/display-controls";
 import TuningHelper from "@/components/tuning-helper";
+import CustomTuning from "@/components/custom-tuning";
 import Fretboard from "@/components/fretboard";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { exportToPNG, exportToPDF, createExportMetadata } from "@/lib/export";
+import { SCALES } from "@/lib/music-theory";
+import { TUNING_PRESETS } from "@/lib/guitar-data";
 
 export default function Home() {
   const {
@@ -27,6 +33,42 @@ export default function Home() {
     fretboardNotes
   } = useFretboard();
 
+  // Determine if current tuning is custom
+  const isCustomTuning = !Object.entries(TUNING_PRESETS).some(([_, preset]) => 
+    preset.strings === guitarType && 
+    JSON.stringify(preset.tuning) === JSON.stringify(tuning.slice(0, guitarType))
+  );
+
+  const handleExportPNG = async () => {
+    try {
+      const metadata = createExportMetadata(
+        guitarType,
+        tuning,
+        scaleType,
+        SCALES[scaleType as keyof typeof SCALES]?.name || scaleType,
+        rootNote
+      );
+      await exportToPNG('fretboard-container', metadata);
+    } catch (error) {
+      console.error('PNG export failed:', error);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const metadata = createExportMetadata(
+        guitarType,
+        tuning,
+        scaleType,
+        SCALES[scaleType as keyof typeof SCALES]?.name || scaleType,
+        rootNote
+      );
+      await exportToPDF('fretboard-container', metadata);
+    } catch (error) {
+      console.error('PDF export failed:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -43,6 +85,28 @@ export default function Home() {
                   Guitar Scales & Modes Explorer
                 </p>
               </div>
+            </div>
+            
+            {/* Export Options */}
+            <div className="flex items-center space-x-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={handleExportPNG}>
+                    <FileImage className="w-4 h-4 mr-2" />
+                    Export as PNG
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportPDF}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    Export as PDF
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -76,14 +140,22 @@ export default function Home() {
               setShowOptions={setShowOptions}
             />
             
-            <TuningHelper
-              guitarType={guitarType}
-              tuning={tuning}
-            />
+            {isCustomTuning ? (
+              <CustomTuning
+                guitarType={guitarType}
+                tuning={tuning}
+                setTuning={setTuning}
+              />
+            ) : (
+              <TuningHelper
+                guitarType={guitarType}
+                tuning={tuning}
+              />
+            )}
           </div>
           
           {/* Main Fretboard */}
-          <div className="lg:col-span-9">
+          <div className="lg:col-span-9" id="fretboard-container">
             <Fretboard
               guitarType={guitarType}
               tuning={tuning}
