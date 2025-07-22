@@ -78,6 +78,84 @@ export const SCALES = {
     intervals: [0, 2, 4, 6, 8, 10],
     pattern: "W-W-W-W-W-W",
     category: "other"
+  },
+  "chromatic": {
+    name: "Chromatic",
+    intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    pattern: "H-H-H-H-H-H-H-H-H-H-H-H",
+    category: "other"
+  },
+  "diminished": {
+    name: "Diminished (Half-Whole)",
+    intervals: [0, 1, 3, 4, 6, 7, 9, 10],
+    pattern: "H-W-H-W-H-W-H-W",
+    category: "other"
+  },
+  "augmented": {
+    name: "Augmented",
+    intervals: [0, 3, 4, 7, 8, 11],
+    pattern: "WH-H-WH-H-WH-H",
+    category: "other"
+  },
+  "hungarian-minor": {
+    name: "Hungarian Minor",
+    intervals: [0, 2, 3, 6, 7, 8, 11],
+    pattern: "W-H-WH-H-H-WH-H",
+    category: "exotic"
+  },
+  "japanese": {
+    name: "Japanese (Hirajoshi)",
+    intervals: [0, 2, 3, 7, 8],
+    pattern: "W-H-2W-H-2W",
+    category: "exotic"
+  },
+  "arabic": {
+    name: "Arabic",
+    intervals: [0, 1, 4, 5, 7, 8, 11],
+    pattern: "H-WH-H-W-H-WH-H",
+    category: "exotic"
+  },
+  "gypsy": {
+    name: "Gypsy",
+    intervals: [0, 1, 4, 5, 7, 8, 10],
+    pattern: "H-WH-H-W-H-W-W",
+    category: "exotic"
+  },
+  "neapolitan-minor": {
+    name: "Neapolitan Minor",
+    intervals: [0, 1, 3, 5, 7, 8, 11],
+    pattern: "H-W-W-W-H-WH-H",
+    category: "exotic"
+  },
+  "enigmatic": {
+    name: "Enigmatic",
+    intervals: [0, 1, 4, 6, 8, 10, 11],
+    pattern: "H-WH-W-W-W-W-H",
+    category: "exotic"
+  },
+  "bebop-dominant": {
+    name: "Bebop Dominant",
+    intervals: [0, 2, 4, 5, 7, 9, 10, 11],
+    pattern: "W-W-H-W-W-H-H-H",
+    category: "jazz"
+  },
+  "bebop-major": {
+    name: "Bebop Major",
+    intervals: [0, 2, 4, 5, 7, 8, 9, 11],
+    pattern: "W-W-H-W-H-H-W-H",
+    category: "jazz"
+  },
+  "altered": {
+    name: "Altered (Super Locrian)",
+    intervals: [0, 1, 3, 4, 6, 8, 10],
+    pattern: "H-W-H-W-W-W-W",
+    category: "jazz"
+  },
+  "lydian-dominant": {
+    name: "Lydian Dominant",
+    intervals: [0, 2, 4, 6, 7, 9, 10],
+    pattern: "W-W-W-H-W-H-W",
+    category: "jazz"
   }
 } as const;
 
