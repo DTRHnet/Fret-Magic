@@ -61,8 +61,8 @@ export default function Fretboard({
           cx={x}
           cy={y}
           r={12}
-          fill={note.isRoot ? "hsl(239, 84%, 67%)" : "hsl(221, 91%, 60%)"}
-          stroke={note.isRoot ? "hsl(239, 84%, 60%)" : "hsl(221, 91%, 53%)"}
+          fill={note.isRoot ? "hsl(0, 84%, 60%)" : "hsl(221, 91%, 60%)"}
+          stroke={note.isRoot ? "hsl(0, 84%, 50%)" : "hsl(221, 91%, 53%)"}
           strokeWidth={2}
         />
         <text
@@ -92,11 +92,11 @@ export default function Fretboard({
             </div>
             <div className="flex items-center space-x-4 text-xs">
               <div className="flex items-center space-x-1">
-                <div className="w-3 h-3 bg-destructive rounded-full"></div>
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "hsl(0, 84%, 60%)" }}></div>
                 <span className="text-slate-600">Root Note</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className="w-3 h-3 bg-primary rounded-full"></div>
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "hsl(221, 91%, 60%)" }}></div>
                 <span className="text-slate-600">Scale Note</span>
               </div>
             </div>
