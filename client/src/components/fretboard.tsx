@@ -63,7 +63,7 @@ export default function Fretboard({
     const x = fretIndex === 0 
       ? nutX + 15 
       : startX + (fretIndex - 1) * fretWidth + fretWidth / 2;
-    const y = startY + stringIndex * stringSpacing;
+    const y = startY + (guitarType - 1 - stringIndex) * stringSpacing;
     
     const displayText = displayMode === "notes" ? note.note : note.interval;
     
@@ -153,9 +153,9 @@ export default function Fretboard({
               <line
                 key={i}
                 x1={nutX}
-                y1={startY + i * stringSpacing}
+                y1={startY + (guitarType - 1 - i) * stringSpacing}
                 x2={startX + fretRange * fretWidth - fretWidth + 20}
-                y2={startY + i * stringSpacing}
+                y2={startY + (guitarType - 1 - i) * stringSpacing}
                 stroke="#64748b"
                 strokeWidth={1}
               />
@@ -214,7 +214,7 @@ export default function Fretboard({
               <text
                 key={i}
                 x={25}
-                y={startY + i * stringSpacing + 5}
+                y={startY + (guitarType - 1 - i) * stringSpacing + 5}
                 className="fill-slate-600 text-sm font-medium"
               >
                 {note}

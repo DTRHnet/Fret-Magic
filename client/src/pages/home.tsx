@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Guitar, Download, FileImage, FileText } from "lucide-react";
+import { Guitar, Download, FileImage, FileText, Move3D } from "lucide-react";
 import { useFretboard } from "@/hooks/use-fretboard";
 import GuitarControls from "@/components/guitar-controls";
 import ScaleControls from "@/components/scale-controls";
@@ -21,6 +21,9 @@ import ShareControls from "@/components/share-controls";
 
 export default function Home() {
   const [forceCustomTuning, setForceCustomTuning] = useState(false);
+  const [isDragMode, setIsDragMode] = useState(false);
+  const [draggedElement, setDraggedElement] = useState<string | null>(null);
+  const [draggedComponent, setDraggedComponent] = useState<HTMLElement | null>(null);
   
   const {
     guitarType,
@@ -103,8 +106,78 @@ export default function Home() {
     }
   };
 
+  // Drag and drop functionality
+  const handleDragStart = (e: React.DragEvent, componentId: string) => {
+    e.dataTransfer.setData('text/plain', componentId);
+    setDraggedElement(componentId);
+    setDraggedComponent(e.currentTarget as HTMLElement);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    const target = e.currentTarget as HTMLElement;
+    target.classList.add('drag-over');
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    const target = e.currentTarget as HTMLElement;
+    target.classList.remove('drag-over');
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    const target = e.currentTarget as HTMLElement;
+    target.classList.remove('drag-over');
+    
+    const sourceId = e.dataTransfer.getData('text/plain');
+    if (sourceId !== targetId && draggedComponent) {
+      // Check if it's a valid drop (e.g., fretboard can't go to left column)
+      if (sourceId === 'fretboard-container' && targetId.includes('left-column')) {
+        return; // Invalid drop - fretboard too large for left column
+      }
+      
+      // Swap components
+      const sourceElement = document.getElementById(sourceId);
+      const targetElement = document.getElementById(targetId);
+      
+      if (sourceElement && targetElement) {
+        const sourceParent = sourceElement.parentNode;
+        const targetParent = targetElement.parentNode;
+        const sourceNextSibling = sourceElement.nextSibling;
+        const targetNextSibling = targetElement.nextSibling;
+        
+        if (sourceParent && targetParent) {
+          if (sourceNextSibling) {
+            sourceParent.insertBefore(targetElement, sourceNextSibling);
+          } else {
+            sourceParent.appendChild(targetElement);
+          }
+          
+          if (targetNextSibling) {
+            targetParent.insertBefore(sourceElement, targetNextSibling);
+          } else {
+            targetParent.appendChild(sourceElement);
+          }
+        }
+      }
+    }
+    
+    setDraggedElement(null);
+    setDraggedComponent(null);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 relative">
+      {/* Drag Mode Overlay */}
+      {isDragMode && (
+        <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 pointer-events-none" />
+      )}
+      
+
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -121,9 +194,20 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Export Options and Tutorial */}
+            {/* Controls */}
             <div className="flex items-center space-x-2">
               <TutorialButton />
+              
+              {/* Drag Mode Toggle */}
+              <Button 
+                variant={isDragMode ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setIsDragMode(!isDragMode)}
+                className="hidden lg:flex"
+              >
+                <Move3D className="w-4 h-4 mr-2" />
+                {isDragMode ? "Exit Arrange" : "Arrange"}
+              </Button>
               
               <div id="export-controls">
                 <DropdownMenu>
@@ -262,11 +346,20 @@ export default function Home() {
         </div>
 
         {/* Desktop Layout */}
-        <div className="hidden lg:grid lg:grid-cols-12 gap-6">
+        <div className="hidden lg:grid lg:grid-cols-6 gap-6">
           
           {/* Left Controls Column */}
-          <div className="lg:col-span-3 space-y-6">
-            <div id="guitar-controls">
+          <div className="lg:col-span-1 space-y-6" id="left-column">
+            <div 
+              id="guitar-controls"
+              className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'guitar-controls' ? 'dragging' : ''}`}
+              draggable={isDragMode}
+              onDragStart={(e) => handleDragStart(e, 'guitar-controls')}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, 'guitar-controls')}
+            >
               <GuitarControls
                 guitarType={guitarType}
                 setGuitarType={setGuitarType}
@@ -313,56 +406,59 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Center Fretboard */}
-          <div className="lg:col-span-6" id="fretboard-container">
-            <Fretboard
-              guitarType={guitarType}
-              tuning={tuning}
-              rootNote={rootNote}
-              scaleType={scaleType}
-              displayMode={displayMode}
-              fretRange={fretRange}
-              showOptions={showOptions}
-              currentScale={currentScale}
-              fretboardNotes={fretboardNotes}
-            />
-          </div>
+          {/* Right Content Area */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Fretboard */}
+            <div id="fretboard-container">
+              <Fretboard
+                guitarType={guitarType}
+                tuning={tuning}
+                rootNote={rootNote}
+                scaleType={scaleType}
+                displayMode={displayMode}
+                fretRange={fretRange}
+                showOptions={showOptions}
+                currentScale={currentScale}
+                fretboardNotes={fretboardNotes}
+              />
+            </div>
 
-          {/* Right Tools Column */}
-          <div className="lg:col-span-3 space-y-6">
-            <ChordShapes
-              rootNote={rootNote}
-              scaleType={scaleType}
-              currentScale={currentScale}
-            />
+            {/* Advanced Tools Grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <ChordShapes
+                rootNote={rootNote}
+                scaleType={scaleType}
+                currentScale={currentScale}
+              />
 
-            <ChordProgressionGenerator
-              rootNote={rootNote}
-              scaleType={scaleType}
-              onChordSelect={(chordNotes) => {
-                console.log('Selected chord notes:', chordNotes);
-                // TODO: Highlight chord notes on fretboard
-              }}
-            />
+              <ChordProgressionGenerator
+                rootNote={rootNote}
+                scaleType={scaleType}
+                onChordSelect={(chordNotes) => {
+                  console.log('Selected chord notes:', chordNotes);
+                  // TODO: Highlight chord notes on fretboard
+                }}
+              />
 
-            <AudioControls
-              rootNote={rootNote}
-              scaleType={scaleType}
-              currentScale={currentScale}
-            />
+              <AudioControls
+                rootNote={rootNote}
+                scaleType={scaleType}
+                currentScale={currentScale}
+              />
 
-            <ShareControls
-              rootNote={rootNote}
-              scaleType={scaleType}
-              guitarType={guitarType}
-              tuning={tuning}
-              showNotes={showOptions.notes}
-              showIntervals={showOptions.intervals}
-              showFretNumbers={showOptions.fretNumbers}
-              fretRange={fretRange}
-              displayMode={displayMode}
-              currentScale={currentScale}
-            />
+              <ShareControls
+                rootNote={rootNote}
+                scaleType={scaleType}
+                guitarType={guitarType}
+                tuning={tuning}
+                showNotes={showOptions.rootNotes}
+                showIntervals={showOptions.scaleNotes}
+                showFretNumbers={showOptions.fretNumbers}
+                fretRange={fretRange}
+                displayMode={displayMode}
+                currentScale={currentScale}
+              />
+            </div>
           </div>
           
         </div>
