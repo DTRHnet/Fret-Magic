@@ -42,7 +42,7 @@ const EXTENDED_SHAPES: Record<string, Record<number, ChordShape[]>> = {
   'C': {
     7: [
       {
-        name: 'C Major 7-String',
+        name: 'C Major 7-String Open',
         fingering: ['x', 3, 2, 0, 1, 0, 0],
         baseFret: 0,
         fingers: [0, 3, 2, 0, 1, 0, 0]
@@ -50,10 +50,102 @@ const EXTENDED_SHAPES: Record<string, Record<number, ChordShape[]>> = {
     ],
     8: [
       {
-        name: 'C Major 8-String',
+        name: 'C Major 8-String Open',
         fingering: ['x', 'x', 3, 2, 0, 1, 0, 0],
         baseFret: 0,
         fingers: [0, 0, 3, 2, 0, 1, 0, 0]
+      }
+    ]
+  },
+  'D': {
+    7: [
+      {
+        name: 'D Major 7-String Open',
+        fingering: ['x', 'x', 0, 2, 3, 2, 0],
+        baseFret: 0,
+        fingers: [0, 0, 0, 1, 3, 2, 0]
+      }
+    ],
+    8: [
+      {
+        name: 'D Major 8-String Open',
+        fingering: ['x', 'x', 'x', 0, 2, 3, 2, 0],
+        baseFret: 0,
+        fingers: [0, 0, 0, 0, 1, 3, 2, 0]
+      }
+    ]
+  },
+  'E': {
+    7: [
+      {
+        name: 'E Major 7-String Open',
+        fingering: [0, 2, 2, 1, 0, 0, 0],
+        baseFret: 0,
+        fingers: [0, 2, 3, 1, 0, 0, 0]
+      }
+    ],
+    8: [
+      {
+        name: 'E Major 8-String Open',
+        fingering: [0, 0, 2, 2, 1, 0, 0, 0],
+        baseFret: 0,
+        fingers: [0, 0, 2, 3, 1, 0, 0, 0]
+      }
+    ]
+  },
+  'F': {
+    7: [
+      {
+        name: 'F Major 7-String Barre',
+        fingering: [1, 3, 3, 2, 1, 1, 1],
+        barres: [{ fret: 1, fromString: 0, toString: 6 }],
+        baseFret: 0,
+        fingers: [1, 3, 4, 2, 1, 1, 1]
+      }
+    ],
+    8: [
+      {
+        name: 'F Major 8-String Barre',
+        fingering: [1, 1, 3, 3, 2, 1, 1, 1],
+        barres: [{ fret: 1, fromString: 0, toString: 7 }],
+        baseFret: 0,
+        fingers: [1, 1, 3, 4, 2, 1, 1, 1]
+      }
+    ]
+  },
+  'G': {
+    7: [
+      {
+        name: 'G Major 7-String Open',
+        fingering: [3, 2, 0, 0, 3, 3, 0],
+        baseFret: 0,
+        fingers: [3, 2, 0, 0, 1, 4, 0]
+      }
+    ],
+    8: [
+      {
+        name: 'G Major 8-String Open',
+        fingering: [3, 3, 2, 0, 0, 3, 3, 0],
+        baseFret: 0,
+        fingers: [2, 3, 1, 0, 0, 4, 5, 0]
+      }
+    ]
+  },
+  'A': {
+    7: [
+      {
+        name: 'A Major 7-String Open',
+        fingering: ['x', 0, 2, 2, 2, 0, 0],
+        baseFret: 0,
+        fingers: [0, 0, 1, 2, 3, 0, 0]
+      }
+    ],
+    8: [
+      {
+        name: 'A Major 8-String Open',
+        fingering: ['x', 'x', 0, 2, 2, 2, 0, 0],
+        baseFret: 0,
+        fingers: [0, 0, 0, 1, 2, 3, 0, 0]
       }
     ]
   }
@@ -199,7 +291,7 @@ function getOrdinalSuffix(num: number): string {
   return 'th';
 }
 
-export function generateChordsForScale(rootNote: string, scaleIntervals: number[]): ChordProgression[] {
+export function generateChordsForScale(rootNote: string, scaleIntervals: number[], guitarType: number = 6): ChordProgression[] {
   const rootIndex = CHROMATIC_NOTES.indexOf(rootNote);
   if (rootIndex === -1) return [];
 
@@ -237,9 +329,9 @@ export function generateChordsForScale(rootNote: string, scaleIntervals: number[
     // Get base shapes and transpose them
     let baseShapes: ChordShape[] = [];
     
-    // Check for extended range shapes first
-    if (EXTENDED_SHAPES[chordRoot] && EXTENDED_SHAPES[chordRoot][6]) {
-      baseShapes = EXTENDED_SHAPES[chordRoot][6];
+    // Check for extended range shapes first based on guitar type
+    if (EXTENDED_SHAPES[chordRoot] && EXTENDED_SHAPES[chordRoot][guitarType]) {
+      baseShapes = EXTENDED_SHAPES[chordRoot][guitarType];
     } else if (isMinor && MINOR_SHAPES[chordRoot + 'm']) {
       baseShapes = MINOR_SHAPES[chordRoot + 'm'];
     } else if (BASIC_SHAPES[chordRoot]) {

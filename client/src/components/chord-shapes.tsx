@@ -49,7 +49,7 @@ export default function ChordShapes({ rootNote, scaleType, guitarType, currentSc
     intervals = patternToIntervals(currentScale.pattern);
   }
   
-  const chordProgressions = intervals ? generateChordsForScale(rootNote, intervals) : [];
+  const chordProgressions = intervals ? generateChordsForScale(rootNote, intervals, guitarType) : [];
   
   if (chordProgressions.length === 0) {
     return (

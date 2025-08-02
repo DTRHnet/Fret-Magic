@@ -63,8 +63,8 @@ export default function Home() {
       if (urlConfig.fretRange) setFretRange(urlConfig.fretRange);
       if (urlConfig.showNotes !== undefined || urlConfig.showIntervals !== undefined || urlConfig.showFretNumbers !== undefined) {
         setShowOptions({
-          notes: urlConfig.showNotes ?? showOptions.notes,
-          intervals: urlConfig.showIntervals ?? showOptions.intervals,
+          rootNotes: urlConfig.showNotes ?? showOptions.rootNotes,
+          scaleNotes: urlConfig.showIntervals ?? showOptions.scaleNotes,
           fretNumbers: urlConfig.showFretNumbers ?? showOptions.fretNumbers
         });
       }
@@ -312,6 +312,7 @@ export default function Home() {
             <ChordShapes
               rootNote={rootNote}
               scaleType={scaleType}
+              guitarType={guitarType}
               currentScale={currentScale}
             />
 
@@ -335,8 +336,8 @@ export default function Home() {
               scaleType={scaleType}
               guitarType={guitarType}
               tuning={tuning}
-              showNotes={showOptions.notes}
-              showIntervals={showOptions.intervals}
+              showNotes={showOptions.rootNotes}
+              showIntervals={showOptions.scaleNotes}
               showFretNumbers={showOptions.fretNumbers}
               fretRange={fretRange}
               displayMode={displayMode}
