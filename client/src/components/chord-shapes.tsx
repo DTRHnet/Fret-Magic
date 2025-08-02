@@ -29,6 +29,7 @@ function patternToIntervals(pattern: string): number[] {
 interface ChordShapesProps {
   rootNote: string;
   scaleType: string;
+  guitarType: number;
   currentScale: {
     name: string;
     notes: string[];
@@ -37,7 +38,7 @@ interface ChordShapesProps {
   };
 }
 
-export default function ChordShapes({ rootNote, scaleType, currentScale }: ChordShapesProps) {
+export default function ChordShapes({ rootNote, scaleType, guitarType, currentScale }: ChordShapesProps) {
   const [selectedChord, setSelectedChord] = useState<number>(0);
   const [isNoteExpanded, setIsNoteExpanded] = useState<boolean>(false);
   
@@ -118,7 +119,7 @@ export default function ChordShapes({ rootNote, scaleType, currentScale }: Chord
                 <div key={shapeIndex} className="p-4 bg-slate-50 rounded-lg">
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: renderChordDiagram(shape, 150)
+                      __html: renderChordDiagram(shape, 150, guitarType)
                     }}
                     className="flex justify-center"
                   />

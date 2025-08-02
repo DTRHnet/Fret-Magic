@@ -428,6 +428,7 @@ export default function Home() {
               <ChordShapes
                 rootNote={rootNote}
                 scaleType={scaleType}
+                guitarType={guitarType}
                 currentScale={currentScale}
               />
 

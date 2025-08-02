@@ -37,6 +37,28 @@ const CHORD_PATTERNS: Record<string, number[][]> = {
   ]
 };
 
+// Extended range chord shapes for 7 and 8 string guitars
+const EXTENDED_SHAPES: Record<string, Record<number, ChordShape[]>> = {
+  'C': {
+    7: [
+      {
+        name: 'C Major 7-String',
+        fingering: ['x', 3, 2, 0, 1, 0, 0],
+        baseFret: 0,
+        fingers: [0, 3, 2, 0, 1, 0, 0]
+      }
+    ],
+    8: [
+      {
+        name: 'C Major 8-String',
+        fingering: ['x', 'x', 3, 2, 0, 1, 0, 0],
+        baseFret: 0,
+        fingers: [0, 0, 3, 2, 0, 1, 0, 0]
+      }
+    ]
+  }
+};
+
 // Basic chord shapes for 6-string guitar
 const BASIC_SHAPES: Record<string, ChordShape[]> = {
   'C': [
@@ -213,9 +235,16 @@ export function generateChordsForScale(rootNote: string, scaleIntervals: number[
     else if (isMinor) chordName += 'm';
     
     // Get base shapes and transpose them
-    const baseShapes = isMinor && MINOR_SHAPES[chordRoot + 'm'] 
-      ? MINOR_SHAPES[chordRoot + 'm']
-      : BASIC_SHAPES[chordRoot] || [];
+    let baseShapes: ChordShape[] = [];
+    
+    // Check for extended range shapes first
+    if (EXTENDED_SHAPES[chordRoot] && EXTENDED_SHAPES[chordRoot][6]) {
+      baseShapes = EXTENDED_SHAPES[chordRoot][6];
+    } else if (isMinor && MINOR_SHAPES[chordRoot + 'm']) {
+      baseShapes = MINOR_SHAPES[chordRoot + 'm'];
+    } else if (BASIC_SHAPES[chordRoot]) {
+      baseShapes = BASIC_SHAPES[chordRoot];
+    }
     
     let shapes: ChordShape[] = [];
     
@@ -242,12 +271,26 @@ export function generateChordsForScale(rootNote: string, scaleIntervals: number[
   return chordProgressions;
 }
 
-export function renderChordDiagram(shape: ChordShape, size: number = 120): string {
+export function renderChordDiagram(shape: ChordShape, size: number = 120, guitarStrings: number = 6): string {
   const frets = 5;
-  const strings = 6;
+  const strings = guitarStrings; // Use the actual guitar string count
   const fretHeight = size / (frets + 1);
   const stringSpacing = size / (strings + 1);
   const dotRadius = stringSpacing / 6;
+  
+  // Extend or truncate shape fingering to match guitar strings
+  const adjustedFingering = [...shape.fingering];
+  const adjustedFingers = [...shape.fingers];
+  
+  while (adjustedFingering.length < strings) {
+    adjustedFingering.unshift('x'); // Add muted strings for extended range
+    adjustedFingers.unshift(0);
+  }
+  
+  while (adjustedFingering.length > strings) {
+    adjustedFingering.shift(); // Remove extra strings if needed
+    adjustedFingers.shift();
+  }
   
   let svg = `
     <svg width="${size}" height="${size * 1.2}" viewBox="0 0 ${size} ${size * 1.2}" xmlns="http://www.w3.org/2000/svg">
@@ -284,16 +327,16 @@ export function renderChordDiagram(shape: ChordShape, size: number = 120): strin
   if (shape.barres) {
     shape.barres.forEach(barre => {
       const fretY = fretHeight * (barre.fret - shape.baseFret + 1.5);
-      const startX = stringSpacing * (strings - barre.toString);
-      const endX = stringSpacing * (strings - barre.fromString);
+      const startX = stringSpacing * (barre.fromString + 1);
+      const endX = stringSpacing * (barre.toString + 1);
       
       svg += `<line x1="${startX}" y1="${fretY}" x2="${endX}" y2="${fretY}" stroke="#333" stroke-width="${dotRadius * 2}" stroke-linecap="round"/>`;
     });
   }
 
   // Draw fingering dots and mutes
-  shape.fingering.forEach((fret, string) => {
-    const x = stringSpacing * (strings - string);
+  adjustedFingering.forEach((fret, string) => {
+    const x = stringSpacing * (string + 1);
     
     if (fret === 'x') {
       // Draw X for muted strings
@@ -311,7 +354,7 @@ export function renderChordDiagram(shape: ChordShape, size: number = 120): strin
       // Draw finger position dot
       const adjustedFret = (fret as number) - shape.baseFret;
       const y = fretHeight * (adjustedFret + 1.5);
-      const fingerNum = shape.fingers[string];
+      const fingerNum = adjustedFingers[string];
       
       svg += `<circle cx="${x}" cy="${y}" r="${dotRadius}" fill="#333"/>`;
       

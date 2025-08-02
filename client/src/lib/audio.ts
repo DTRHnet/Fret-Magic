@@ -84,11 +84,19 @@ class AudioEngine {
   private playbackQueue: Array<{ frequency: number; time: number; duration: string }> = [];
 
   async initialize() {
-    if (!this.synth) {
-      await Tone.start();
-      this.createSynth();
+    try {
+      if (!this.synth) {
+        // Ensure Tone.js context is started with user interaction
+        if (Tone.context.state !== 'running') {
+          await Tone.start();
+        }
+        this.createSynth();
+      }
+      return this.synth;
+    } catch (error) {
+      console.error('Audio initialization failed:', error);
+      throw new Error('Audio not available - user interaction required');
     }
-    return this.synth;
   }
 
   private createSynth() {
@@ -162,7 +170,9 @@ class AudioEngine {
   async playNote(frequency: number, duration = "8n") {
     try {
       const synth = await this.initialize();
-      if (!synth) return;
+      if (!synth) {
+        throw new Error('Audio synthesis not available');
+      }
       
       const actualVolume = this.isMuted ? 0 : this.volume;
       
@@ -171,6 +181,7 @@ class AudioEngine {
       
     } catch (error) {
       console.error("Audio playback error:", error);
+      throw error; // Re-throw to handle in UI
     }
   }
 
