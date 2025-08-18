@@ -28,27 +28,64 @@ if ! command -v psql >/dev/null 2>&1; then
 fi
 echo "[OK] PostgreSQL client found: $(psql --version)"
 
-# Check if PostgreSQL service is running
+# Check and start PostgreSQL service with version detection
 echo "[CHECK] Verifying PostgreSQL service status..."
-if ! sudo systemctl is-active --quiet postgresql 2>/dev/null && ! pgrep -x postgres >/dev/null; then
+POSTGRES_RUNNING=false
+
+# Check various PostgreSQL service patterns
+if sudo systemctl is-active --quiet postgresql 2>/dev/null; then
+    echo "[OK] PostgreSQL service is running (generic service)"
+    POSTGRES_RUNNING=true
+elif systemctl list-units --type=service --state=active | grep -q "postgresql@"; then
+    ACTIVE_PG_VERSION=$(systemctl list-units --type=service --state=active | grep "postgresql@" | head -n1 | awk '{print $1}')
+    echo "[OK] PostgreSQL service is running ($ACTIVE_PG_VERSION)"
+    POSTGRES_RUNNING=true
+elif pgrep -x postgres >/dev/null; then
+    echo "[OK] PostgreSQL is running (detected by process)"
+    POSTGRES_RUNNING=true
+fi
+
+if [[ "$POSTGRES_RUNNING" == "false" ]]; then
     echo "[WARN] PostgreSQL service appears to be stopped"
     echo "[ACTION] Attempting to start PostgreSQL service..."
-    if command -v systemctl >/dev/null 2>&1; then
-        sudo systemctl start postgresql
-        sleep 2
-        if sudo systemctl is-active --quiet postgresql; then
-            echo "[OK] PostgreSQL service started successfully"
+    
+    # Try to detect and start the correct PostgreSQL version
+    POSTGRES_VERSION=$(ls /etc/postgresql/ 2>/dev/null | sort -V | tail -n1)
+    if [[ -n "$POSTGRES_VERSION" ]]; then
+        echo "[INFO] Detected PostgreSQL version: $POSTGRES_VERSION"
+        echo "[ACTION] Starting postgresql@$POSTGRES_VERSION service..."
+        sudo systemctl enable postgresql@$POSTGRES_VERSION 2>/dev/null || true
+        sudo systemctl start postgresql@$POSTGRES_VERSION 2>/dev/null || true
+        sleep 3
+        
+        if sudo systemctl is-active --quiet postgresql@$POSTGRES_VERSION 2>/dev/null; then
+            echo "[OK] PostgreSQL $POSTGRES_VERSION service started successfully"
         else
-            echo "[ERROR] Failed to start PostgreSQL service"
-            exit 1
+            echo "[WARN] Version-specific service failed, trying generic service..."
+            sudo systemctl enable postgresql 2>/dev/null || true
+            sudo systemctl start postgresql 2>/dev/null || true
+            sleep 3
         fi
     else
-        echo "[ERROR] Cannot start PostgreSQL service (systemctl not available)"
-        echo "[MANUAL] Please start PostgreSQL manually and re-run this script"
+        echo "[ACTION] Starting generic PostgreSQL service..."
+        sudo systemctl enable postgresql 2>/dev/null || true
+        sudo systemctl start postgresql 2>/dev/null || true
+        sleep 3
+    fi
+    
+    # Final check
+    if sudo systemctl is-active --quiet postgresql 2>/dev/null || sudo systemctl is-active --quiet postgresql@* 2>/dev/null || pgrep -x postgres >/dev/null; then
+        echo "[OK] PostgreSQL service started successfully"
+    else
+        echo "[ERROR] Failed to start PostgreSQL service"
+        echo "[MANUAL] Please check PostgreSQL installation and start manually:"
+        echo "  - sudo systemctl status postgresql"
+        echo "  - sudo systemctl status postgresql@*"
+        echo "  - sudo journalctl -u postgresql"
         exit 1
     fi
 else
-    echo "[OK] PostgreSQL service is running"
+    echo "[OK] PostgreSQL service is already running"
 fi
 
 # Check PostgreSQL configuration for password authentication

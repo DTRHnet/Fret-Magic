@@ -73,29 +73,66 @@ fi
 echo "Installing project dependencies..."
 npm install
 
-# Install PostgreSQL
+# Install PostgreSQL with version management
 if ! command -v psql >/dev/null 2>&1; then
     echo "Installing PostgreSQL..."
     if [[ "$PACKAGE_MANAGER" == "apt" ]]; then
-        $INSTALL_CMD postgresql postgresql-contrib
-        sudo systemctl start postgresql
-        sudo systemctl enable postgresql
+        # Install latest PostgreSQL version
+        $INSTALL_CMD postgresql postgresql-contrib postgresql-client
+        
+        # Ensure PostgreSQL service is properly configured
+        POSTGRES_VERSION=$(ls /etc/postgresql/ | head -n1)
+        if [[ -n "$POSTGRES_VERSION" ]]; then
+            echo "Detected PostgreSQL version: $POSTGRES_VERSION"
+            sudo systemctl enable postgresql@$POSTGRES_VERSION
+            sudo systemctl start postgresql@$POSTGRES_VERSION
+            
+            # Also try the generic service
+            sudo systemctl enable postgresql 2>/dev/null || true
+            sudo systemctl start postgresql 2>/dev/null || true
+        else
+            sudo systemctl enable postgresql
+            sudo systemctl start postgresql
+        fi
     elif [[ "$PACKAGE_MANAGER" == "dnf" ]]; then
         $INSTALL_CMD postgresql postgresql-server postgresql-contrib
         sudo postgresql-setup --initdb
-        sudo systemctl start postgresql
         sudo systemctl enable postgresql
+        sudo systemctl start postgresql
     elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
         $INSTALL_CMD postgresql
         sudo -u postgres initdb -D /var/lib/postgres/data
-        sudo systemctl start postgresql
         sudo systemctl enable postgresql
+        sudo systemctl start postgresql
     elif [[ "$PACKAGE_MANAGER" == "brew" ]]; then
         $INSTALL_CMD postgresql
         brew services start postgresql
     fi
 else
     echo "✅ PostgreSQL is already installed"
+    
+    # Ensure services are running for existing installations
+    if [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+        POSTGRES_VERSION=$(ls /etc/postgresql/ 2>/dev/null | head -n1)
+        if [[ -n "$POSTGRES_VERSION" ]]; then
+            sudo systemctl enable postgresql@$POSTGRES_VERSION 2>/dev/null || true
+            sudo systemctl start postgresql@$POSTGRES_VERSION 2>/dev/null || true
+        fi
+        sudo systemctl enable postgresql 2>/dev/null || true
+        sudo systemctl start postgresql 2>/dev/null || true
+    fi
+fi
+
+# Verify PostgreSQL installation and service
+echo "Verifying PostgreSQL installation..."
+sleep 2
+if systemctl is-active --quiet postgresql || systemctl is-active --quiet postgresql@* 2>/dev/null; then
+    echo "✅ PostgreSQL service is running"
+elif pgrep -x postgres >/dev/null; then
+    echo "✅ PostgreSQL is running (detected by process)"
+else
+    echo "⚠️  PostgreSQL service may not be running properly"
+    echo "    You may need to start it manually after installation"
 fi
 
 echo "✅ Installation completed successfully!"
