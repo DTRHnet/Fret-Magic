@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://app_user:app_password@postgres:5432/app_db
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGDATABASE=app_db
+      - PGUSER=app_user
+      - PGPASSWORD=app_password
+
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
