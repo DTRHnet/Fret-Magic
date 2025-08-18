@@ -56,14 +56,37 @@ echo "[CHECK] Verifying PostgreSQL authentication configuration..."
 PG_VERSION=$(sudo -u postgres psql -t -c "SELECT version();" | grep -o "PostgreSQL [0-9]*" | grep -o "[0-9]*")
 echo "[INFO] Detected PostgreSQL version: $PG_VERSION"
 
-# Test connection to PostgreSQL
+# Test connection to PostgreSQL with better error handling
 echo "[TEST] Testing PostgreSQL connection..."
-if ! sudo -u postgres psql -c "SELECT 1;" >/dev/null 2>&1; then
-    echo "[ERROR] Cannot connect to PostgreSQL as postgres user"
-    echo "[SOLUTION] Check PostgreSQL configuration and permissions"
-    exit 1
+CONNECTION_ATTEMPTS=0
+MAX_ATTEMPTS=3
+
+while [ $CONNECTION_ATTEMPTS -lt $MAX_ATTEMPTS ]; do
+    if sudo -u postgres psql -c "SELECT 1;" >/dev/null 2>&1; then
+        echo "[OK] PostgreSQL connection successful"
+        break
+    else
+        CONNECTION_ATTEMPTS=$((CONNECTION_ATTEMPTS + 1))
+        echo "[WARN] Connection attempt $CONNECTION_ATTEMPTS failed"
+        
+        if [ $CONNECTION_ATTEMPTS -lt $MAX_ATTEMPTS ]; then
+            echo "[ACTION] Attempting to restart PostgreSQL service..."
+            # Try different PostgreSQL service patterns
+            sudo systemctl restart postgresql 2>/dev/null ||             sudo systemctl restart postgresql@* 2>/dev/null ||             sudo service postgresql restart 2>/dev/null || true
+            sleep 3
+        fi
+    fi
+done
+
+if [ $CONNECTION_ATTEMPTS -eq $MAX_ATTEMPTS ]; then
+    echo "[ERROR] Could not establish PostgreSQL connection after $MAX_ATTEMPTS attempts"
+    echo "[INFO] Detected PostgreSQL version: $(psql --version 2>/dev/null || echo 'Unknown')"
+    echo "[MANUAL] Please check PostgreSQL service status manually:"
+    echo "  - sudo systemctl status postgresql"
+    echo "  - sudo systemctl status postgresql@*"
+    echo "  - Check PostgreSQL logs: sudo journalctl -u postgresql"
+    echo "[CONTINUE] Proceeding with database setup (may fail)..."
 fi
-echo "[OK] PostgreSQL connection successful"
 
 # Check if database already exists
 echo "[CHECK] Checking if database '$DB_NAME' already exists..."

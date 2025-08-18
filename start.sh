@@ -3,9 +3,12 @@ set -e
 
 echo "🚀 Starting nodejs application..."
 
-# Load environment variables
+# Load environment variables safely
 if [[ -f ".env.local" ]]; then
-    export $(cat .env.local | xargs)
+    echo "Loading environment variables from .env.local..."
+    set -a  # Automatically export all variables
+    source .env.local
+    set +a  # Turn off automatic export
     echo "✅ Environment variables loaded"
 else
     echo "⚠️  .env.local file not found. Some features may not work."
