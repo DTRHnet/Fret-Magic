@@ -404,21 +404,23 @@ export function renderChordDiagram(shape: ChordShape, size: number = 120, guitar
   // Draw frets (horizontal lines)
   for (let fret = 0; fret <= frets; fret++) {
     const y = fretHeight * (fret + 1);
-    const strokeWidth = fret === 0 ? 3 : 1; // Nut is thicker
+    const strokeWidth = (shape.baseFret === 0 && fret === 0) ? 3 : 1; // Only draw nut thicker when base fret is open
     svg += `<line x1="${stringSpacing}" y1="${y}" x2="${stringSpacing * strings}" y2="${y}" stroke="#333" stroke-width="${strokeWidth}"/>`;
   }
 
-  // Draw fret numbers
+  // Draw base fret number (e.g., "3" for positions starting at 3rd fret)
   if (shape.baseFret > 0) {
     svg += `<text x="${stringSpacing/2}" y="${fretHeight * 1.5}" text-anchor="middle" font-family="Arial" font-size="${size/15}" fill="#666">
-      ${shape.baseFret + 1}
+      ${shape.baseFret}
     </text>`;
   }
 
   // Draw barres
   if (shape.barres) {
     shape.barres.forEach(barre => {
-      const fretY = fretHeight * (barre.fret - shape.baseFret + 1.5);
+      const adjustedBarreFret = barre.fret - shape.baseFret;
+      const verticalOffset = shape.baseFret > 0 ? 1.5 : 0.5; // Open-position vs moved-position diagrams
+      const fretY = fretHeight * (adjustedBarreFret + verticalOffset);
       const startX = stringSpacing * (barre.fromString + 1);
       const endX = stringSpacing * (barre.toString + 1);
       
@@ -445,7 +447,8 @@ export function renderChordDiagram(shape: ChordShape, size: number = 120, guitar
     } else {
       // Draw finger position dot
       const adjustedFret = (fret as number) - shape.baseFret;
-      const y = fretHeight * (adjustedFret + 1.5);
+      const verticalOffset = shape.baseFret > 0 ? 1.5 : 0.5; // Center of the correct fret box
+      const y = fretHeight * (adjustedFret + verticalOffset);
       const fingerNum = adjustedFingers[string];
       
       svg += `<circle cx="${x}" cy="${y}" r="${dotRadius}" fill="#333"/>`;
