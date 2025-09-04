@@ -12,7 +12,6 @@ export function useFretboard() {
   const [showOptions, setShowOptions] = useState({
     rootNotes: true,
     scaleNotes: true,
-    allNotes: true, // Show all notes by default
     fretNumbers: false
   });
 

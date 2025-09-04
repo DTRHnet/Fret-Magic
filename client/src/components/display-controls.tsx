@@ -13,13 +13,11 @@ interface DisplayControlsProps {
   showOptions: {
     rootNotes: boolean;
     scaleNotes: boolean;
-    allNotes: boolean;
     fretNumbers: boolean;
   };
   setShowOptions: (options: {
     rootNotes: boolean;
     scaleNotes: boolean;
-    allNotes: boolean;
     fretNumbers: boolean;
   }) => void;
 }
@@ -104,19 +102,6 @@ export default function DisplayControls({
                 />
                 <Label htmlFor="show-scale" className="text-sm text-slate-700">
                   Show Scale Notes
-                </Label>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="show-all"
-                  checked={showOptions.allNotes}
-                  onCheckedChange={(checked) =>
-                    setShowOptions({ ...showOptions, allNotes: !!checked })
-                  }
-                />
-                <Label htmlFor="show-all" className="text-sm text-slate-700">
-                  Show All Notes
                 </Label>
               </div>
               
