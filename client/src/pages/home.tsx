@@ -65,6 +65,7 @@ export default function Home() {
         setShowOptions({
           rootNotes: urlConfig.showNotes ?? showOptions.rootNotes,
           scaleNotes: urlConfig.showIntervals ?? showOptions.scaleNotes,
+          allNotes: showOptions.allNotes, // Keep current allNotes setting
           fretNumbers: urlConfig.showFretNumbers ?? showOptions.fretNumbers
         });
       }

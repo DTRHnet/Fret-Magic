@@ -13,6 +13,7 @@ interface FretboardProps {
   showOptions: {
     rootNotes: boolean;
     scaleNotes: boolean;
+    allNotes: boolean;
     fretNumbers: boolean;
   };
   currentScale: {
@@ -55,6 +56,13 @@ export default function Fretboard({
   };
 
   const renderNote = (note: FretboardNote, stringIndex: number, fretIndex: number) => {
+    // Show all notes if allNotes is enabled
+    if (showOptions.allNotes) {
+      if (!showOptions.rootNotes && note.isRoot) return null;
+      return true; // Show all notes
+    }
+    
+    // Otherwise, only show scale notes and root notes
     if (!note.isInScale && !note.isRoot) return null;
     
     if (!showOptions.rootNotes && note.isRoot) return null;
@@ -77,8 +85,20 @@ export default function Fretboard({
           cx={x}
           cy={y}
           r={12}
-          fill={note.isRoot ? "hsl(0, 84%, 60%)" : "hsl(221, 91%, 60%)"}
-          stroke={note.isRoot ? "hsl(0, 84%, 50%)" : "hsl(221, 91%, 53%)"}
+          fill={
+            note.isRoot 
+              ? "hsl(0, 84%, 60%)" 
+              : note.isInScale 
+                ? "hsl(221, 91%, 60%)" 
+                : "hsl(0, 0%, 70%)" // Gray for non-scale notes
+          }
+          stroke={
+            note.isRoot 
+              ? "hsl(0, 84%, 50%)" 
+              : note.isInScale 
+                ? "hsl(221, 91%, 53%)" 
+                : "hsl(0, 0%, 60%)" // Darker gray for non-scale notes
+          }
           strokeWidth={2}
         />
         <text
@@ -115,6 +135,12 @@ export default function Fretboard({
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "hsl(221, 91%, 60%)" }}></div>
                 <span className="text-slate-600">Scale Note</span>
               </div>
+              {showOptions.allNotes && (
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "hsl(0, 0%, 70%)" }}></div>
+                  <span className="text-slate-600">Other Note</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
