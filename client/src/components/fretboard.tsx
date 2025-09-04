@@ -55,10 +55,26 @@ export default function Fretboard({
   };
 
   const renderNote = (note: FretboardNote, stringIndex: number, fretIndex: number) => {
-    if (!note.isInScale && !note.isRoot) return null;
+    // Show all notes by default, but allow filtering by options
+    // If both rootNotes and scaleNotes are disabled, show all notes
+    if (!showOptions.rootNotes && !showOptions.scaleNotes) {
+      return true; // Show all notes
+    }
     
-    if (!showOptions.rootNotes && note.isRoot) return null;
-    if (!showOptions.scaleNotes && note.isInScale && !note.isRoot) return null;
+    // If only rootNotes is enabled, show only root notes
+    if (showOptions.rootNotes && !showOptions.scaleNotes) {
+      return note.isRoot;
+    }
+    
+    // If only scaleNotes is enabled, show only scale notes
+    if (!showOptions.rootNotes && showOptions.scaleNotes) {
+      return note.isInScale;
+    }
+    
+    // If both are enabled, show both root and scale notes
+    if (showOptions.rootNotes && showOptions.scaleNotes) {
+      return note.isRoot || note.isInScale;
+    }
 
     const x = fretIndex === 0
       ? nutX + fretWidth / 2
@@ -77,8 +93,20 @@ export default function Fretboard({
           cx={x}
           cy={y}
           r={12}
-          fill={note.isRoot ? "hsl(0, 84%, 60%)" : "hsl(221, 91%, 60%)"}
-          stroke={note.isRoot ? "hsl(0, 84%, 50%)" : "hsl(221, 91%, 53%)"}
+          fill={
+            note.isRoot 
+              ? "hsl(0, 84%, 60%)" 
+              : note.isInScale 
+                ? "hsl(221, 91%, 60%)" 
+                : "hsl(0, 0%, 70%)" // Gray for non-scale notes
+          }
+          stroke={
+            note.isRoot 
+              ? "hsl(0, 84%, 50%)" 
+              : note.isInScale 
+                ? "hsl(221, 91%, 53%)" 
+                : "hsl(0, 0%, 60%)" // Darker gray for non-scale notes
+          }
           strokeWidth={2}
         />
         <text
@@ -114,6 +142,10 @@ export default function Fretboard({
               <div className="flex items-center space-x-1">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "hsl(221, 91%, 60%)" }}></div>
                 <span className="text-slate-600">Scale Note</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "hsl(0, 0%, 70%)" }}></div>
+                <span className="text-slate-600">Other Note</span>
               </div>
             </div>
           </div>

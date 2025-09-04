@@ -10,8 +10,8 @@ export function useFretboard() {
   const [displayMode, setDisplayMode] = useState<"notes" | "intervals">("notes");
   const [fretRange, setFretRange] = useState<number>(15);
   const [showOptions, setShowOptions] = useState({
-    rootNotes: true,
-    scaleNotes: true,
+    rootNotes: false, // Show all notes by default
+    scaleNotes: false, // Show all notes by default
     fretNumbers: false
   });
 
