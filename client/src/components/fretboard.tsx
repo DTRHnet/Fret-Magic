@@ -60,9 +60,11 @@ export default function Fretboard({
     if (!showOptions.rootNotes && note.isRoot) return null;
     if (!showOptions.scaleNotes && note.isInScale && !note.isRoot) return null;
 
-    const x = fretIndex === 0 
-      ? nutX + 15 
-      : startX + (fretIndex - 1) * fretWidth + fretWidth / 2;
+    const x = fretIndex === 0
+      ? nutX + 15
+      : fretIndex === 1
+        ? (nutX + startX) / 2
+        : startX + (fretIndex - 1) * fretWidth - fretWidth / 2;
     const y = startY + (guitarType - 1 - stringIndex) * stringSpacing;
     
     const displayText = displayMode === "notes" ? note.note : note.interval;
@@ -197,17 +199,22 @@ export default function Fretboard({
             )}
             
             {/* Fret Numbers */}
-            {showOptions.fretNumbers && Array.from({ length: fretRange }, (_, i) => (
-              <text
-                key={i}
-                x={startX + i * fretWidth + fretWidth / 2}
-                y={svgHeight - 20}
-                textAnchor="middle"
-                className="fill-slate-400 text-xs font-medium"
-              >
-                {i + 1}
-              </text>
-            ))}
+            {showOptions.fretNumbers && Array.from({ length: fretRange }, (_, i) => {
+              const x = i === 0
+                ? (nutX + startX) / 2
+                : startX + i * fretWidth - fretWidth / 2;
+              return (
+                <text
+                  key={i}
+                  x={x}
+                  y={svgHeight - 20}
+                  textAnchor="middle"
+                  className="fill-slate-400 text-xs font-medium"
+                >
+                  {i + 1}
+                </text>
+              );
+            })}
             
             {/* String Labels */}
             {tuning.slice(0, guitarType).map((note, i) => (

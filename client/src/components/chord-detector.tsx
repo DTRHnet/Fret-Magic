@@ -34,7 +34,7 @@ export default function ChordDetector({
   const handlePlayChord = async (chord: DetectedChord) => {
     setPlayingChord(chord.name);
     try {
-      await audioEngine.playChord(chord.notes, 2.0);
+      await audioEngine.playChord(chord.notes, "2n");
     } catch (error) {
       console.error("Failed to play chord:", error);
     }

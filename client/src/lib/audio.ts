@@ -259,6 +259,22 @@ class AudioEngine {
     }
   }
 
+  // Play a single chord (all notes simultaneously)
+  async playChord(notes: string[], duration: string = "2n") {
+    try {
+      const synth = await this.initialize();
+      if (!synth) return;
+      const actualVolume = this.isMuted ? 0 : this.volume;
+      synth.volume.value = Tone.gainToDb(actualVolume);
+      notes.forEach(note => {
+        const frequency = NOTE_FREQUENCIES[normalizeNote(note)] || 440;
+        synth.triggerAttackRelease(frequency, duration);
+      });
+    } catch (error) {
+      console.error('Chord playback error:', error);
+    }
+  }
+
   // Play an arpeggio pattern
   async playArpeggio(notes: string[], pattern: number[] = [0, 1, 2, 1], tempo = 120) {
     if (this.isPlaying) {
