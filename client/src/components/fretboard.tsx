@@ -56,7 +56,6 @@ export default function Fretboard({
 
   const renderNote = (note: FretboardNote, stringIndex: number, fretIndex: number) => {
     // Show all notes by default, but allow filtering by options
-    // If both rootNotes and scaleNotes are disabled, show all notes
     if (!showOptions.rootNotes && !showOptions.scaleNotes) {
       // Show all notes - continue to render
     } else if (showOptions.rootNotes && !showOptions.scaleNotes) {
@@ -68,6 +67,8 @@ export default function Fretboard({
     } else if (showOptions.rootNotes && showOptions.scaleNotes) {
       // If both are enabled, show both root and scale notes
       if (!note.isRoot && !note.isInScale) return null;
+    } else {
+      // Fallback: show all notes if no specific case matches
     }
 
     const x = fretIndex === 0

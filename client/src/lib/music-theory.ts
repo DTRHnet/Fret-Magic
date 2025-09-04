@@ -331,8 +331,12 @@ export function normalizeNote(note: string): string {
 }
 
 export function getNoteIndex(note: string): number {
+  if (!note || note.trim() === '') {
+    return 0; // Default to C if note is empty
+  }
   const normalized = normalizeNote(note);
-  return NOTES.indexOf(normalized);
+  const index = NOTES.indexOf(normalized);
+  return index >= 0 ? index : 0; // Default to C if note not found
 }
 
 export function getNoteAtIndex(index: number): string {
@@ -378,6 +382,11 @@ export function calculateFretboardNotes(
   scaleType: string,
   maxFrets: number = 24
 ): FretboardNote[][] {
+  // Handle empty or invalid tuning
+  if (!tuning || tuning.length === 0) {
+    return [];
+  }
+  
   const scaleNotes = getScaleNotes(rootNote, scaleType);
   const scaleNoteIndices = scaleNotes.map(note => getNoteIndex(note));
   
