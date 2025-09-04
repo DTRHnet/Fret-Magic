@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface DisplayControlsProps {
   displayMode: "notes" | "intervals";
@@ -78,33 +79,51 @@ export default function DisplayControls({
               />
             </div>
             
+            <div>
+              <Label className="text-sm font-medium text-slate-700 mb-3 block">
+                Note Display Mode
+              </Label>
+              <RadioGroup
+                value={
+                  !showOptions.rootNotes && !showOptions.scaleNotes
+                    ? "all"
+                    : showOptions.rootNotes && !showOptions.scaleNotes
+                    ? "root"
+                    : "scale"
+                }
+                onValueChange={(value) => {
+                  if (value === "all") {
+                    setShowOptions({ ...showOptions, rootNotes: false, scaleNotes: false });
+                  } else if (value === "root") {
+                    setShowOptions({ ...showOptions, rootNotes: true, scaleNotes: false });
+                  } else if (value === "scale") {
+                    setShowOptions({ ...showOptions, rootNotes: true, scaleNotes: true });
+                  }
+                }}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="all" />
+                  <Label htmlFor="all" className="text-sm text-slate-700">
+                    All Notes
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="scale" id="scale" />
+                  <Label htmlFor="scale" className="text-sm text-slate-700">
+                    Scale Notes
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="root" id="root" />
+                  <Label htmlFor="root" className="text-sm text-slate-700">
+                    Root Notes
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+            
             <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="show-root"
-                  checked={showOptions.rootNotes}
-                  onCheckedChange={(checked) =>
-                    setShowOptions({ ...showOptions, rootNotes: !!checked })
-                  }
-                />
-                <Label htmlFor="show-root" className="text-sm text-slate-700">
-                  Show Root Notes
-                </Label>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="show-scale"
-                  checked={showOptions.scaleNotes}
-                  onCheckedChange={(checked) =>
-                    setShowOptions({ ...showOptions, scaleNotes: !!checked })
-                  }
-                />
-                <Label htmlFor="show-scale" className="text-sm text-slate-700">
-                  Show Scale Notes
-                </Label>
-              </div>
-              
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="show-frets"
