@@ -36,9 +36,9 @@ export default function Fretboard({
 }: FretboardProps) {
   const fretWidth = 70;
   const stringSpacing = 35;
-  const startX = 80;
-  const startY = 40;
   const nutX = 50;
+  const startX = nutX + fretWidth; // This ensures first fret has same width as others
+  const startY = 40;
   
   const svgWidth = startX + (fretRange + 1) * fretWidth + 50;
   const svgHeight = startY + (guitarType - 1) * stringSpacing + 80;
@@ -61,7 +61,7 @@ export default function Fretboard({
     if (!showOptions.scaleNotes && note.isInScale && !note.isRoot) return null;
 
     const x = fretIndex === 0
-      ? nutX + 15
+      ? nutX + fretWidth / 2
       : startX + (fretIndex - 1) * fretWidth + fretWidth / 2;
     const y = startY + (guitarType - 1 - stringIndex) * stringSpacing;
     
@@ -201,7 +201,7 @@ export default function Fretboard({
             {/* Fret Numbers */}
             {showOptions.fretNumbers && Array.from({ length: fretRange }, (_, i) => {
               const x = i === 0
-                ? nutX + 15
+                ? nutX + fretWidth / 2
                 : startX + i * fretWidth - fretWidth / 2;
               return (
                 <text
