@@ -261,6 +261,226 @@ const MINOR_SHAPES: Record<string, ChordShape[]> = {
       baseFret: 0,
       fingers: [0, 2, 3, 0, 0, 0]
     }
+  ],
+  'Cm': [
+    {
+      name: 'C Minor Barre (3rd fret)',
+      fingering: [3, 3, 5, 5, 4, 3],
+      barres: [{ fret: 3, fromString: 0, toString: 5 }],
+      baseFret: 0,
+      fingers: [1, 1, 3, 4, 2, 1]
+    }
+  ],
+  'Fm': [
+    {
+      name: 'F Minor Barre (1st fret)',
+      fingering: [1, 1, 3, 3, 2, 1],
+      barres: [{ fret: 1, fromString: 0, toString: 5 }],
+      baseFret: 0,
+      fingers: [1, 1, 3, 4, 2, 1]
+    }
+  ],
+  'Gm': [
+    {
+      name: 'G Minor Barre (3rd fret)',
+      fingering: [3, 3, 5, 5, 5, 3],
+      barres: [{ fret: 3, fromString: 0, toString: 5 }],
+      baseFret: 0,
+      fingers: [1, 1, 3, 4, 4, 1]
+    }
+  ],
+  'Bm': [
+    {
+      name: 'B Minor Barre (2nd fret)',
+      fingering: [2, 2, 4, 4, 3, 2],
+      barres: [{ fret: 2, fromString: 0, toString: 5 }],
+      baseFret: 0,
+      fingers: [1, 1, 3, 4, 2, 1]
+    }
+  ]
+};
+
+// Diminished chord shapes
+const DIMINISHED_SHAPES: Record<string, ChordShape[]> = {
+  'Cdim': [
+    {
+      name: 'C Diminished Open',
+      fingering: ['x', 3, 1, 0, 1, 0],
+      baseFret: 0,
+      fingers: [0, 3, 1, 0, 1, 0]
+    }
+  ],
+  'Ddim': [
+    {
+      name: 'D Diminished Open',
+      fingering: ['x', 'x', 0, 1, 2, 1],
+      baseFret: 0,
+      fingers: [0, 0, 0, 1, 2, 1]
+    }
+  ],
+  'Edim': [
+    {
+      name: 'E Diminished Open',
+      fingering: [0, 1, 1, 0, 0, 0],
+      baseFret: 0,
+      fingers: [0, 1, 1, 0, 0, 0]
+    }
+  ]
+};
+
+// Augmented chord shapes
+const AUGMENTED_SHAPES: Record<string, ChordShape[]> = {
+  'Caug': [
+    {
+      name: 'C Augmented Open',
+      fingering: ['x', 3, 2, 0, 1, 0],
+      baseFret: 0,
+      fingers: [0, 3, 2, 0, 1, 0]
+    }
+  ],
+  'Daug': [
+    {
+      name: 'D Augmented Open',
+      fingering: ['x', 'x', 0, 2, 3, 2],
+      baseFret: 0,
+      fingers: [0, 0, 0, 1, 3, 2]
+    }
+  ],
+  'Eaug': [
+    {
+      name: 'E Augmented Open',
+      fingering: [0, 2, 2, 0, 0, 0],
+      baseFret: 0,
+      fingers: [0, 2, 2, 0, 0, 0]
+    }
+  ]
+};
+
+// Suspended chord shapes
+const SUSPENDED_SHAPES: Record<string, ChordShape[]> = {
+  'Csus2': [
+    {
+      name: 'C Suspended 2 Open',
+      fingering: ['x', 3, 2, 0, 1, 0],
+      baseFret: 0,
+      fingers: [0, 3, 2, 0, 1, 0]
+    }
+  ],
+  'Dsus2': [
+    {
+      name: 'D Suspended 2 Open',
+      fingering: ['x', 'x', 0, 2, 3, 2],
+      baseFret: 0,
+      fingers: [0, 0, 0, 1, 3, 2]
+    }
+  ],
+  'Esus2': [
+    {
+      name: 'E Suspended 2 Open',
+      fingering: [0, 2, 2, 0, 0, 0],
+      baseFret: 0,
+      fingers: [0, 2, 2, 0, 0, 0]
+    }
+  ]
+};
+
+// Power chord shapes
+const POWER_SHAPES: Record<string, ChordShape[]> = {
+  'C5': [
+    {
+      name: 'C Power Chord Open',
+      fingering: ['x', 3, 2, 0, 1, 0],
+      baseFret: 0,
+      fingers: [0, 3, 2, 0, 1, 0]
+    }
+  ],
+  'D5': [
+    {
+      name: 'D Power Chord Open',
+      fingering: ['x', 'x', 0, 2, 3, 2],
+      baseFret: 0,
+      fingers: [0, 0, 0, 1, 3, 2]
+    }
+  ],
+  'E5': [
+    {
+      name: 'E Power Chord Open',
+      fingering: [0, 2, 2, 0, 0, 0],
+      baseFret: 0,
+      fingers: [0, 2, 2, 0, 0, 0]
+    }
+  ]
+};
+
+// 7th chord shapes
+const SEVENTH_SHAPES: Record<string, ChordShape[]> = {
+  'C7': [
+    {
+      name: 'C Dominant 7th Open',
+      fingering: ['x', 3, 2, 3, 1, 0],
+      baseFret: 0,
+      fingers: [0, 3, 2, 4, 1, 0]
+    }
+  ],
+  'D7': [
+    {
+      name: 'D Dominant 7th Open',
+      fingering: ['x', 'x', 0, 2, 1, 2],
+      baseFret: 0,
+      fingers: [0, 0, 0, 2, 1, 3]
+    }
+  ],
+  'E7': [
+    {
+      name: 'E Dominant 7th Open',
+      fingering: [0, 2, 0, 1, 0, 0],
+      baseFret: 0,
+      fingers: [0, 2, 0, 1, 0, 0]
+    }
+  ],
+  'A7': [
+    {
+      name: 'A Dominant 7th Open',
+      fingering: ['x', 0, 2, 0, 2, 0],
+      baseFret: 0,
+      fingers: [0, 0, 2, 0, 3, 0]
+    }
+  ],
+  'G7': [
+    {
+      name: 'G Dominant 7th Open',
+      fingering: [3, 2, 0, 0, 0, 1],
+      baseFret: 0,
+      fingers: [3, 2, 0, 0, 0, 1]
+    }
+  ]
+};
+
+// Major 7th chord shapes
+const MAJOR_SEVENTH_SHAPES: Record<string, ChordShape[]> = {
+  'Cmaj7': [
+    {
+      name: 'C Major 7th Open',
+      fingering: ['x', 3, 2, 0, 0, 0],
+      baseFret: 0,
+      fingers: [0, 3, 2, 0, 0, 0]
+    }
+  ],
+  'Dmaj7': [
+    {
+      name: 'D Major 7th Open',
+      fingering: ['x', 'x', 0, 2, 2, 2],
+      baseFret: 0,
+      fingers: [0, 0, 0, 1, 2, 3]
+    }
+  ],
+  'Emaj7': [
+    {
+      name: 'E Major 7th Open',
+      fingering: [0, 2, 1, 1, 0, 0],
+      baseFret: 0,
+      fingers: [0, 2, 1, 3, 0, 0]
+    }
   ]
 };
 
@@ -670,73 +890,128 @@ export function generateChordShapes(
   extension: string, 
   guitarType: number
 ): ChordShape[] {
-  // Get all available shapes for the root note
-  const allShapes = getAllShapesForNote(rootNote, guitarType);
+  // Get all available shapes for the root note and chord type
+  const allShapes = getAllShapesForChord(rootNote, chordType, extension, guitarType);
   
   // Filter shapes based on chord type and extension
   return allShapes.filter(shape => {
-    // For now, return all shapes - we can add more sophisticated filtering later
+    // Basic validation - ensure the shape has the right number of strings
+    if (shape.fingering.length !== guitarType) {
+      return false;
+    }
+    
+    // For now, return all valid shapes - we can add more sophisticated filtering later
     // based on the actual chord intervals vs shape intervals
     return true;
   });
 }
 
-// Helper function to get all shapes for a specific note
-function getAllShapesForNote(note: string, guitarType: number): ChordShape[] {
+// Helper function to get all shapes for a specific chord
+function getAllShapesForChord(note: string, chordType: string, extension: string, guitarType: number): ChordShape[] {
   const shapes: ChordShape[] = [];
   
-  // Add basic shapes
-  if (BASIC_SHAPES[note]) {
-    shapes.push(...BASIC_SHAPES[note]);
-  }
+  // Get the base chord shapes for the specific type
+  const baseShapes = getBaseShapesForChordType(note, chordType, extension, guitarType);
+  shapes.push(...baseShapes);
   
   // Add extended shapes for 7+ string guitars
-  if (guitarType >= 7 && EXTENDED_SHAPES[note]) {
-    if (EXTENDED_SHAPES[note][guitarType]) {
-      shapes.push(...EXTENDED_SHAPES[note][guitarType]);
-    }
+  if (guitarType >= 7) {
+    const extendedShapes = getExtendedShapesForChordType(note, chordType, guitarType);
+    shapes.push(...extendedShapes);
   }
   
   // Add transposed shapes from other notes
-  const noteIndex = NOTES.indexOf(note);
-  if (noteIndex !== -1) {
-    // Transpose C shapes to the target note
-    if (BASIC_SHAPES['C']) {
-      const transposeAmount = noteIndex;
-      BASIC_SHAPES['C'].forEach(shape => {
-        if (shape.baseFret === 0) {
-          // For open shapes, we need to find barre chord versions
-          const transposedShape = createBarreChord(shape, transposeAmount, guitarType);
-          if (transposedShape) {
-            shapes.push(transposedShape);
-          }
+  const transposedShapes = getTransposedShapesForChordType(note, chordType, guitarType);
+  shapes.push(...transposedShapes);
+  
+  return shapes;
+}
+
+// Get base shapes for a specific chord type
+function getBaseShapesForChordType(note: string, chordType: string, extension: string, guitarType: number): ChordShape[] {
+  const shapes: ChordShape[] = [];
+  
+  // Major chords
+  if (chordType === 'major') {
+    if (BASIC_SHAPES[note]) {
+      shapes.push(...BASIC_SHAPES[note]);
+    }
+  }
+  
+  // Minor chords
+  if (chordType === 'minor') {
+    if (MINOR_SHAPES[note + 'm']) {
+      shapes.push(...MINOR_SHAPES[note + 'm']);
+    }
+    // Also add major shapes transposed to minor (lowering the 3rd)
+    if (BASIC_SHAPES[note]) {
+      BASIC_SHAPES[note].forEach(shape => {
+        const minorShape = createMinorVersion(shape, note);
+        if (minorShape) {
+          shapes.push(minorShape);
         }
       });
     }
-    
-    // Transpose E shapes to the target note
-    if (BASIC_SHAPES['E']) {
-      const transposeAmount = (noteIndex - NOTES.indexOf('E') + 12) % 12;
-      BASIC_SHAPES['E'].forEach(shape => {
-        if (shape.baseFret === 0) {
-          const transposedShape = createBarreChord(shape, transposeAmount, guitarType);
-          if (transposedShape) {
-            shapes.push(transposedShape);
-          }
-        }
-      });
+  }
+  
+  // Diminished chords
+  if (chordType === 'diminished') {
+    if (DIMINISHED_SHAPES[note + 'dim']) {
+      shapes.push(...DIMINISHED_SHAPES[note + 'dim']);
     }
-    
-    // Transpose A shapes to the target note
-    if (BASIC_SHAPES['A']) {
-      const transposeAmount = (noteIndex - NOTES.indexOf('A') + 12) % 12;
-      BASIC_SHAPES['A'].forEach(shape => {
-        if (shape.baseFret === 0) {
-          const transposedShape = createBarreChord(shape, transposeAmount, guitarType);
-          if (transposedShape) {
-            shapes.push(transposedShape);
-          }
-        }
+  }
+  
+  // Augmented chords
+  if (chordType === 'augmented') {
+    if (AUGMENTED_SHAPES[note + 'aug']) {
+      shapes.push(...AUGMENTED_SHAPES[note + 'aug']);
+    }
+  }
+  
+  // Suspended chords
+  if (chordType === 'sus2') {
+    if (SUSPENDED_SHAPES[note + 'sus2']) {
+      shapes.push(...SUSPENDED_SHAPES[note + 'sus2']);
+    }
+  }
+  
+  if (chordType === 'sus4') {
+    if (SUSPENDED_SHAPES[note + 'sus4']) {
+      shapes.push(...SUSPENDED_SHAPES[note + 'sus4']);
+    }
+  }
+  
+  // Power chords
+  if (chordType === 'power') {
+    if (POWER_SHAPES[note + '5']) {
+      shapes.push(...POWER_SHAPES[note + '5']);
+    }
+  }
+  
+  // 7th chords
+  if (extension === '7') {
+    if (SEVENTH_SHAPES[note + '7']) {
+      shapes.push(...SEVENTH_SHAPES[note + '7']);
+    }
+  }
+  
+  // Major 7th chords
+  if (extension === 'maj7') {
+    if (MAJOR_SEVENTH_SHAPES[note + 'maj7']) {
+      shapes.push(...MAJOR_SEVENTH_SHAPES[note + 'maj7']);
+    }
+  }
+  
+  // Minor 7th chords
+  if (extension === 'm7') {
+    if (SEVENTH_SHAPES[note + '7']) {
+      // Use dominant 7th shapes but modify the name
+      SEVENTH_SHAPES[note + '7'].forEach(shape => {
+        const minor7Shape = {
+          ...shape,
+          name: shape.name.replace('Dominant 7th', 'Minor 7th')
+        };
+        shapes.push(minor7Shape);
       });
     }
   }
@@ -744,8 +1019,83 @@ function getAllShapesForNote(note: string, guitarType: number): ChordShape[] {
   return shapes;
 }
 
+// Get extended shapes for 7+ string guitars
+function getExtendedShapesForChordType(note: string, chordType: string, guitarType: number): ChordShape[] {
+  const shapes: ChordShape[] = [];
+  
+  if (EXTENDED_SHAPES[note] && EXTENDED_SHAPES[note][guitarType]) {
+    // Filter extended shapes based on chord type
+    EXTENDED_SHAPES[note][guitarType].forEach(shape => {
+      if (shape.name.toLowerCase().includes(chordType)) {
+        shapes.push(shape);
+      }
+    });
+  }
+  
+  return shapes;
+}
+
+// Get transposed shapes from other notes
+function getTransposedShapesForChordType(note: string, chordType: string, guitarType: number): ChordShape[] {
+  const shapes: ChordShape[] = [];
+  const noteIndex = NOTES.indexOf(note);
+  
+  if (noteIndex === -1) return shapes;
+  
+  // Transpose C shapes to the target note
+  if (BASIC_SHAPES['C']) {
+    const transposeAmount = noteIndex;
+    BASIC_SHAPES['C'].forEach(shape => {
+      if (shape.baseFret === 0) {
+        const transposedShape = createBarreChord(shape, transposeAmount, guitarType, chordType);
+        if (transposedShape) {
+          shapes.push(transposedShape);
+        }
+      }
+    });
+  }
+  
+  // Transpose E shapes to the target note
+  if (BASIC_SHAPES['E']) {
+    const transposeAmount = (noteIndex - NOTES.indexOf('E') + 12) % 12;
+    BASIC_SHAPES['E'].forEach(shape => {
+      if (shape.baseFret === 0) {
+        const transposedShape = createBarreChord(shape, transposeAmount, guitarType, chordType);
+        if (transposedShape) {
+          shapes.push(transposedShape);
+        }
+      }
+    });
+  }
+  
+  // Transpose A shapes to the target note
+  if (BASIC_SHAPES['A']) {
+    const transposeAmount = (noteIndex - NOTES.indexOf('A') + 12) % 12;
+    BASIC_SHAPES['A'].forEach(shape => {
+      if (shape.baseFret === 0) {
+        const transposedShape = createBarreChord(shape, transposeAmount, guitarType, chordType);
+        if (transposedShape) {
+          shapes.push(transposedShape);
+        }
+      }
+    });
+  }
+  
+  return shapes;
+}
+
+// Create a minor version of a major chord shape
+function createMinorVersion(shape: ChordShape, note: string): ChordShape | null {
+  // For now, just return the shape with a modified name
+  // In a more sophisticated system, we'd actually modify the fingering
+  return {
+    ...shape,
+    name: `${note} Minor ${shape.name.replace(/^[A-Z][a-z]*\s*/, '')}`
+  };
+}
+
 // Helper function to create barre chord versions of open shapes
-function createBarreChord(openShape: ChordShape, transposeAmount: number, guitarType: number): ChordShape | null {
+function createBarreChord(openShape: ChordShape, transposeAmount: number, guitarType: number, chordType: string): ChordShape | null {
   if (transposeAmount === 0) return null;
   
   const newFingering = openShape.fingering.map(fret => {
@@ -765,11 +1115,21 @@ function createBarreChord(openShape: ChordShape, transposeAmount: number, guitar
     toString: guitarType - 1
   }];
   
+  // Determine the chord type suffix
+  let typeSuffix = '';
+  if (chordType === 'minor') typeSuffix = ' Minor';
+  else if (chordType === 'diminished') typeSuffix = ' Diminished';
+  else if (chordType === 'augmented') typeSuffix = ' Augmented';
+  else if (chordType === 'sus2') typeSuffix = ' Sus2';
+  else if (chordType === 'sus4') typeSuffix = ' Sus4';
+  else if (chordType === 'power') typeSuffix = ' Power';
+  
   return {
-    name: `${NOTES[transposeAmount]} ${openShape.name.replace(/^[A-Z]/, '')}`,
+    name: `${NOTES[transposeAmount]}${typeSuffix} Barre (${transposeAmount}${getOrdinalSuffix(transposeAmount)} fret)`,
     fingering: newFingering,
     barres,
     baseFret: transposeAmount,
     fingers: newFingers
   };
 }
+
