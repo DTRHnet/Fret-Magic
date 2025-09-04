@@ -58,22 +58,16 @@ export default function Fretboard({
     // Show all notes by default, but allow filtering by options
     // If both rootNotes and scaleNotes are disabled, show all notes
     if (!showOptions.rootNotes && !showOptions.scaleNotes) {
-      return true; // Show all notes
-    }
-    
-    // If only rootNotes is enabled, show only root notes
-    if (showOptions.rootNotes && !showOptions.scaleNotes) {
-      return note.isRoot;
-    }
-    
-    // If only scaleNotes is enabled, show only scale notes
-    if (!showOptions.rootNotes && showOptions.scaleNotes) {
-      return note.isInScale;
-    }
-    
-    // If both are enabled, show both root and scale notes
-    if (showOptions.rootNotes && showOptions.scaleNotes) {
-      return note.isRoot || note.isInScale;
+      // Show all notes - continue to render
+    } else if (showOptions.rootNotes && !showOptions.scaleNotes) {
+      // If only rootNotes is enabled, show only root notes
+      if (!note.isRoot) return null;
+    } else if (!showOptions.rootNotes && showOptions.scaleNotes) {
+      // If only scaleNotes is enabled, show only scale notes
+      if (!note.isInScale) return null;
+    } else if (showOptions.rootNotes && showOptions.scaleNotes) {
+      // If both are enabled, show both root and scale notes
+      if (!note.isRoot && !note.isInScale) return null;
     }
 
     const x = fretIndex === 0
@@ -196,7 +190,7 @@ export default function Fretboard({
             {/* Fret Markers */}
             {[3, 5, 7, 9, 12].map((fret) => {
               if (fret > fretRange) return null;
-              const x = startX + (fret - 1) * fretWidth + fretWidth / 2;
+              const x = startX + (fret - 2) * fretWidth + fretWidth / 2;
               const centerY = startY + ((guitarType - 1) * stringSpacing) / 2;
               
               if (fret === 12) {
