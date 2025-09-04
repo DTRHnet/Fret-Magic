@@ -228,7 +228,7 @@ export default function Fretboard({
             {showOptions.fretNumbers && Array.from({ length: fretRange }, (_, i) => {
               const x = i === 0
                 ? nutX + fretWidth / 2
-                : startX + i * fretWidth - fretWidth / 2;
+                : startX + i * fretWidth;
               return (
                 <text
                   key={i}
