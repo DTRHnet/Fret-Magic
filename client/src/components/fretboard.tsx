@@ -62,9 +62,7 @@ export default function Fretboard({
 
     const x = fretIndex === 0
       ? nutX + 15
-      : fretIndex === 1
-        ? (nutX + startX) / 2
-        : startX + (fretIndex - 1) * fretWidth - fretWidth / 2;
+      : startX + (fretIndex - 1) * fretWidth + fretWidth / 2;
     const y = startY + (guitarType - 1 - stringIndex) * stringSpacing;
     
     const displayText = displayMode === "notes" ? note.note : note.interval;
@@ -164,10 +162,30 @@ export default function Fretboard({
             ))}
             
             {/* Fret Markers */}
-            {[3, 5, 7, 9, 15, 17, 19, 21].map((fret) => {
+            {[3, 5, 7, 9, 12].map((fret) => {
               if (fret > fretRange) return null;
               const x = startX + (fret - 1) * fretWidth + fretWidth / 2;
               const centerY = startY + ((guitarType - 1) * stringSpacing) / 2;
+              
+              if (fret === 12) {
+                // Double marker for 12th fret
+                return (
+                  <g key={fret}>
+                    <circle
+                      cx={x}
+                      cy={centerY - 15}
+                      r={4}
+                      fill="#cbd5e1"
+                    />
+                    <circle
+                      cx={x}
+                      cy={centerY + 15}
+                      r={4}
+                      fill="#cbd5e1"
+                    />
+                  </g>
+                );
+              }
               
               return (
                 <circle
@@ -180,28 +198,10 @@ export default function Fretboard({
               );
             })}
             
-            {/* 12th Fret Double Marker */}
-            {fretRange >= 12 && (
-              <>
-                <circle
-                  cx={startX + 11 * fretWidth + fretWidth / 2}
-                  cy={startY + ((guitarType - 1) * stringSpacing) / 2 - 15}
-                  r={4}
-                  fill="#cbd5e1"
-                />
-                <circle
-                  cx={startX + 11 * fretWidth + fretWidth / 2}
-                  cy={startY + ((guitarType - 1) * stringSpacing) / 2 + 15}
-                  r={4}
-                  fill="#cbd5e1"
-                />
-              </>
-            )}
-            
             {/* Fret Numbers */}
             {showOptions.fretNumbers && Array.from({ length: fretRange }, (_, i) => {
               const x = i === 0
-                ? (nutX + startX) / 2
+                ? nutX + 15
                 : startX + i * fretWidth - fretWidth / 2;
               return (
                 <text
