@@ -277,6 +277,22 @@ export default function Home() {
                 setShowOptions={setShowOptions}
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="fretboard-container">
+              <Fretboard
+                guitarType={guitarType}
+                tuning={tuning}
+                rootNote={rootNote}
+                scaleType={scaleType}
+                displayMode={displayMode}
+                fretRange={fretRange}
+                showOptions={showOptions}
+                currentScale={currentScale}
+                fretboardNotes={fretboardNotes}
+              />
+            </div>
             
             <div id="tuning-controls">
               {isCustomTuning ? (
@@ -292,20 +308,6 @@ export default function Home() {
                 />
               )}
             </div>
-          </div>
-
-          <div id="fretboard-container">
-            <Fretboard
-              guitarType={guitarType}
-              tuning={tuning}
-              rootNote={rootNote}
-              scaleType={scaleType}
-              displayMode={displayMode}
-              fretRange={fretRange}
-              showOptions={showOptions}
-              currentScale={currentScale}
-              fretboardNotes={fretboardNotes}
-            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
