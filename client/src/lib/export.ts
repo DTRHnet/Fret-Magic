@@ -234,7 +234,7 @@ export interface ShareableConfig {
   showNotes: boolean;
   showIntervals: boolean;
   showFretNumbers: boolean;
-  fretRange: [number, number];
+  fretRange: number;
   displayMode: 'notes' | 'intervals';
 }
 
@@ -250,7 +250,7 @@ export function createShareableUrl(config: ShareableConfig): string {
   params.set('notes', config.showNotes.toString());
   params.set('intervals', config.showIntervals.toString());
   params.set('frets', config.showFretNumbers.toString());
-  params.set('range', `${config.fretRange[0]}-${config.fretRange[1]}`);
+  params.set('range', String(config.fretRange));
   params.set('mode', config.displayMode);
   
   return `${baseUrl}?${params.toString()}`;
@@ -278,8 +278,8 @@ export function parseConfigFromUrl(): Partial<ShareableConfig> | null {
     
     const rangeParam = params.get('range');
     if (rangeParam) {
-      const [start, end] = rangeParam.split('-').map(Number);
-      config.fretRange = [start, end];
+      const value = parseInt(rangeParam);
+      if (!isNaN(value)) config.fretRange = value;
     }
     
     return config;

@@ -609,3 +609,54 @@ export function romanNumeralToChord(roman: string, rootNote: string, scaleType: 
     return '';
   }
 }
+
+// --- Added chord detection helpers for UI components ---
+
+export interface DetectedChord {
+  name: string;
+  notes: string[];
+  quality: 'major' | 'minor' | 'dominished' | 'augmented' | 'dominant' | 'diminished';
+}
+
+// Provide a list of common diatonic chords in the key
+export function getCommonChordsInKey(rootNote: string, scaleType: string): string[] {
+  try {
+    // Choose a default diatonic set based on the scale family
+    const majorRomans = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii'];
+    const minorRomans = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'];
+    const dorianRomans = ['i', 'ii', 'III', 'IV', 'v', 'vi', 'VII'];
+
+    let romans = majorRomans;
+    const st = scaleType.toLowerCase();
+    if (st.includes('aeolian') || st === 'minor') romans = minorRomans;
+    else if (st.includes('dorian')) romans = dorianRomans;
+
+    // Use our existing progression generator to convert to chord symbols
+    const progression = generateChordProgression(rootNote, scaleType, romans);
+    return progression.map(p => p.symbol);
+  } catch (err) {
+    console.error('getCommonChordsInKey failed:', err);
+    return [];
+  }
+}
+
+// Light-weight detector that surfaces diatonic triads as available shapes
+export function detectChordsInScale(
+  rootNote: string,
+  scaleType: string,
+  _tuning: string[],
+  _maxFrets: number
+): DetectedChord[] {
+  try {
+    const romans = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii'];
+    const items = generateChordProgression(rootNote, scaleType, romans);
+    return items.map(item => ({
+      name: item.symbol,
+      notes: item.notes,
+      quality: item.quality
+    })) as DetectedChord[];
+  } catch (err) {
+    console.error('detectChordsInScale failed:', err);
+    return [];
+  }
+}

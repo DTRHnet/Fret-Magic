@@ -16,7 +16,7 @@ interface ShareControlsProps {
   showNotes: boolean;
   showIntervals: boolean;
   showFretNumbers: boolean;
-  fretRange: [number, number];
+  fretRange: number;
   displayMode: 'notes' | 'intervals';
   currentScale: {
     name: string;
@@ -155,7 +155,7 @@ export default function ShareControls({
             <Badge variant="outline">{rootNote} Root</Badge>
             <Badge variant="outline">{guitarType}-String</Badge>
             <Badge variant="outline">{displayMode === 'notes' ? 'Notes' : 'Intervals'}</Badge>
-            <Badge variant="outline">Frets {fretRange[0]}-{fretRange[1]}</Badge>
+            <Badge variant="outline">Frets 1-{fretRange}</Badge>
           </div>
         </div>
 
