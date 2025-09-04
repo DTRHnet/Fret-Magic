@@ -1,4 +1,6 @@
 // Chord library with fingering patterns and theory
+import { NOTES } from './music-theory';
+
 export interface ChordShape {
   name: string;
   fingering: (number | 'x')[];
@@ -659,4 +661,115 @@ export function detectChordsInScale(
     console.error('detectChordsInScale failed:', err);
     return [];
   }
+}
+
+// Generate chord shapes based on root note, chord type, and extensions
+export function generateChordShapes(
+  rootNote: string, 
+  chordType: string, 
+  extension: string, 
+  guitarType: number
+): ChordShape[] {
+  // Get all available shapes for the root note
+  const allShapes = getAllShapesForNote(rootNote, guitarType);
+  
+  // Filter shapes based on chord type and extension
+  return allShapes.filter(shape => {
+    // For now, return all shapes - we can add more sophisticated filtering later
+    // based on the actual chord intervals vs shape intervals
+    return true;
+  });
+}
+
+// Helper function to get all shapes for a specific note
+function getAllShapesForNote(note: string, guitarType: number): ChordShape[] {
+  const shapes: ChordShape[] = [];
+  
+  // Add basic shapes
+  if (BASIC_SHAPES[note]) {
+    shapes.push(...BASIC_SHAPES[note]);
+  }
+  
+  // Add extended shapes for 7+ string guitars
+  if (guitarType >= 7 && EXTENDED_SHAPES[note]) {
+    if (EXTENDED_SHAPES[note][guitarType]) {
+      shapes.push(...EXTENDED_SHAPES[note][guitarType]);
+    }
+  }
+  
+  // Add transposed shapes from other notes
+  const noteIndex = NOTES.indexOf(note);
+  if (noteIndex !== -1) {
+    // Transpose C shapes to the target note
+    if (BASIC_SHAPES['C']) {
+      const transposeAmount = noteIndex;
+      BASIC_SHAPES['C'].forEach(shape => {
+        if (shape.baseFret === 0) {
+          // For open shapes, we need to find barre chord versions
+          const transposedShape = createBarreChord(shape, transposeAmount, guitarType);
+          if (transposedShape) {
+            shapes.push(transposedShape);
+          }
+        }
+      });
+    }
+    
+    // Transpose E shapes to the target note
+    if (BASIC_SHAPES['E']) {
+      const transposeAmount = (noteIndex - NOTES.indexOf('E') + 12) % 12;
+      BASIC_SHAPES['E'].forEach(shape => {
+        if (shape.baseFret === 0) {
+          const transposedShape = createBarreChord(shape, transposeAmount, guitarType);
+          if (transposedShape) {
+            shapes.push(transposedShape);
+          }
+        }
+      });
+    }
+    
+    // Transpose A shapes to the target note
+    if (BASIC_SHAPES['A']) {
+      const transposeAmount = (noteIndex - NOTES.indexOf('A') + 12) % 12;
+      BASIC_SHAPES['A'].forEach(shape => {
+        if (shape.baseFret === 0) {
+          const transposedShape = createBarreChord(shape, transposeAmount, guitarType);
+          if (transposedShape) {
+            shapes.push(transposedShape);
+          }
+        }
+      });
+    }
+  }
+  
+  return shapes;
+}
+
+// Helper function to create barre chord versions of open shapes
+function createBarreChord(openShape: ChordShape, transposeAmount: number, guitarType: number): ChordShape | null {
+  if (transposeAmount === 0) return null;
+  
+  const newFingering = openShape.fingering.map(fret => {
+    if (fret === 'x' || fret === 0) return fret;
+    return (fret as number) + transposeAmount;
+  });
+  
+  const newFingers = openShape.fingers.map(finger => {
+    if (finger === 0) return 0;
+    return finger;
+  });
+  
+  // Create barre across all strings
+  const barres = [{
+    fret: transposeAmount,
+    fromString: 0,
+    toString: guitarType - 1
+  }];
+  
+  return {
+    name: `${NOTES[transposeAmount]} ${openShape.name.replace(/^[A-Z]/, '')}`,
+    fingering: newFingering,
+    barres,
+    baseFret: transposeAmount,
+    fingers: newFingers
+  };
 }
