@@ -321,6 +321,8 @@ export default function Home() {
             <ChordProgressionGenerator
               rootNote={rootNote}
               scaleType={scaleType}
+              guitarType={guitarType}
+              tuning={tuning}
               onChordSelect={(chordNotes) => {
                 console.log('Selected chord notes:', chordNotes);
                 // TODO: Highlight chord notes on fretboard
@@ -438,6 +440,8 @@ export default function Home() {
               <ChordProgressionGenerator
                 rootNote={rootNote}
                 scaleType={scaleType}
+                guitarType={guitarType}
+                tuning={tuning}
                 onChordSelect={(chordNotes) => {
                   console.log('Selected chord notes:', chordNotes);
                   // TODO: Highlight chord notes on fretboard
