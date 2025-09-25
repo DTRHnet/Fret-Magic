@@ -357,10 +357,10 @@ export default function Home() {
         </div>
 
         {/* Desktop Layout */}
-        <div className="hidden lg:grid lg:grid-cols-6 gap-6">
+        <div className="hidden lg:grid lg:grid-cols-6 gap-6 overflow-x-auto">
           
           {/* Left Controls Column */}
-          <div className="lg:col-span-1 space-y-6" id="left-column">
+          <div className="lg:col-span-1 space-y-6 min-w-[320px]" id="left-column">
             <div 
               id="guitar-controls"
               className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'guitar-controls' ? 'dragging' : ''}`}
@@ -420,7 +420,7 @@ export default function Home() {
           </div>
           
           {/* Right Content Area */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 space-y-6 min-w-[900px]">
             {/* Fretboard */}
             <div id="fretboard-container">
               <Fretboard
