@@ -361,25 +361,25 @@ const SUSPENDED_SHAPES: Record<string, ChordShape[]> = {
   'Csus2': [
     {
       name: 'C Suspended 2 Open',
-      fingering: ['x', 3, 2, 0, 1, 0],
+      fingering: ['x', 3, 0, 0, 1, 3], // C D G C G
       baseFret: 0,
-      fingers: [0, 3, 2, 0, 1, 0]
+      fingers: [0, 3, 0, 0, 1, 4]
     }
   ],
   'Dsus2': [
     {
       name: 'D Suspended 2 Open',
-      fingering: ['x', 'x', 0, 2, 3, 2],
+      fingering: ['x', 'x', 0, 2, 3, 0], // D A D
       baseFret: 0,
-      fingers: [0, 0, 0, 1, 3, 2]
+      fingers: [0, 0, 0, 1, 3, 0]
     }
   ],
   'Esus2': [
     {
       name: 'E Suspended 2 Open',
-      fingering: [0, 2, 2, 0, 0, 0],
+      fingering: [0, 2, 4, 4, 0, 0], // E B F# B E
       baseFret: 0,
-      fingers: [0, 2, 2, 0, 0, 0]
+      fingers: [0, 1, 3, 4, 0, 0]
     }
   ]
 };
@@ -388,26 +388,26 @@ const SUSPENDED_SHAPES: Record<string, ChordShape[]> = {
 const POWER_SHAPES: Record<string, ChordShape[]> = {
   'C5': [
     {
-      name: 'C Power Chord Open',
-      fingering: ['x', 3, 2, 0, 1, 0],
+      name: 'C5 (A-string shape)',
+      fingering: ['x', 3, 5, 5, 'x', 'x'], // C G C
       baseFret: 0,
-      fingers: [0, 3, 2, 0, 1, 0]
+      fingers: [0, 1, 3, 4, 0, 0]
     }
   ],
   'D5': [
     {
-      name: 'D Power Chord Open',
-      fingering: ['x', 'x', 0, 2, 3, 2],
+      name: 'D5 (D-string open shape)',
+      fingering: ['x', 'x', 0, 2, 3, 'x'], // D A D
       baseFret: 0,
-      fingers: [0, 0, 0, 1, 3, 2]
+      fingers: [0, 0, 0, 1, 3, 0]
     }
   ],
   'E5': [
     {
-      name: 'E Power Chord Open',
-      fingering: [0, 2, 2, 0, 0, 0],
+      name: 'E5 (E-string open shape)',
+      fingering: [0, 2, 2, 'x', 'x', 'x'], // E B E
       baseFret: 0,
-      fingers: [0, 2, 2, 0, 0, 0]
+      fingers: [0, 1, 3, 0, 0, 0]
     }
   ]
 };
