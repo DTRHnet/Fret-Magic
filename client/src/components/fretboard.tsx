@@ -55,6 +55,8 @@ export default function Fretboard({
   };
 
   const renderNote = (note: FretboardNote, stringIndex: number, fretIndex: number) => {
+    // Skip rendering open-string note markers; the left labels already show tuning
+    if (fretIndex === 0) return null;
     // Show all notes by default, but allow filtering by options
     if (!showOptions.rootNotes && !showOptions.scaleNotes) {
       // Show all notes - continue to render
@@ -71,9 +73,9 @@ export default function Fretboard({
       // Fallback: show all notes if no specific case matches
     }
 
-    const x = fretIndex === 0
+    const x = fretIndex === 1
       ? nutX + fretWidth / 2
-      : startX + (fretIndex - 1) * fretWidth + fretWidth / 2;
+      : startX + (fretIndex - 2) * fretWidth + fretWidth / 2;
     const y = startY + (guitarType - 1 - stringIndex) * stringSpacing;
     
     const displayText = displayMode === "notes" ? note.note : note.interval;
@@ -229,7 +231,7 @@ export default function Fretboard({
             {showOptions.fretNumbers && Array.from({ length: fretRange }, (_, i) => {
               const x = i === 0
                 ? nutX + fretWidth / 2
-                : startX + i * fretWidth;
+                : startX + (i - 1) * fretWidth + fretWidth / 2;
               return (
                 <text
                   key={i}
