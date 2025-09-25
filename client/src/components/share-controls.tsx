@@ -18,6 +18,7 @@ interface ShareControlsProps {
   showFretNumbers: boolean;
   fretRange: number;
   displayMode: 'notes' | 'intervals' | 'degrees';
+  noteSpelling?: 'auto' | 'sharps' | 'flats';
   currentScale: {
     name: string;
     notes: string[];
@@ -35,6 +36,7 @@ export default function ShareControls({
   showFretNumbers,
   fretRange,
   displayMode,
+  noteSpelling,
   currentScale
 }: ShareControlsProps) {
   const [shareUrl, setShareUrl] = useState('');
@@ -52,7 +54,8 @@ export default function ShareControls({
       showIntervals,
       showFretNumbers,
       fretRange,
-      displayMode
+      displayMode,
+      noteSpelling
     };
 
     const url = createShareableUrl(config);
@@ -155,6 +158,7 @@ export default function ShareControls({
             <Badge variant="outline">{rootNote} Root</Badge>
             <Badge variant="outline">{guitarType}-String</Badge>
             <Badge variant="outline">{displayMode === 'notes' ? 'Notes' : displayMode === 'degrees' ? 'Degrees' : 'Intervals'}</Badge>
+            <Badge variant="outline">{noteSpelling ? `Spelling: ${noteSpelling}` : 'Spelling: auto'}</Badge>
             <Badge variant="outline">Frets 1-{fretRange}</Badge>
           </div>
         </div>

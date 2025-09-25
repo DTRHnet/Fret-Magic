@@ -62,6 +62,7 @@ export default function Home() {
       if (urlConfig.scaleType) setScaleType(urlConfig.scaleType);
       if (urlConfig.guitarType) setGuitarType(urlConfig.guitarType);
       if (urlConfig.displayMode) setDisplayMode(urlConfig.displayMode);
+      if (urlConfig.noteSpelling) setNoteSpelling(urlConfig.noteSpelling);
       if (urlConfig.fretRange) setFretRange(urlConfig.fretRange);
       if (urlConfig.showNotes !== undefined || urlConfig.showIntervals !== undefined || urlConfig.showFretNumbers !== undefined) {
         setShowOptions({
@@ -472,6 +473,8 @@ export default function Home() {
                 showFretNumbers={showOptions.fretNumbers}
                 fretRange={fretRange}
                 displayMode={displayMode}
+                noteSpelling={noteSpelling}
+                noteSpelling={noteSpelling}
                 currentScale={currentScale}
               />
             </div>

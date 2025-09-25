@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import * as Tone from "tone";
+import { normalizeNote } from "@/lib/music-theory";
 
 interface TuningHelperProps {
   guitarType: number;
@@ -62,7 +63,7 @@ export default function TuningHelper({ guitarType, tuning }: TuningHelperProps) 
   }, [synth]);
 
   const getStringFrequency = (note: string, stringIndex: number): number => {
-    const baseFreq = NOTE_FREQUENCIES[note];
+    const baseFreq = NOTE_FREQUENCIES[normalizeNote(note)];
     if (!baseFreq) return 440; // Default to A4
     
     const octave = STRING_OCTAVES[guitarType]?.[stringIndex] || 3;

@@ -295,7 +295,7 @@ export default function Fretboard({
             </div>
             <div>
               <span className="font-medium text-slate-700">Notes:</span>
-              <span className="ml-2 text-slate-600">{currentScale.notes.join(", ")}</span>
+              <span className="ml-2 text-slate-600">{currentScale.notes.map(n => formatNoteForDisplay(n, noteSpelling, rootNote)).join(", ")}</span>
             </div>
             <div>
               <span className="font-medium text-slate-700">Pattern:</span>

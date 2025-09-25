@@ -236,6 +236,7 @@ export interface ShareableConfig {
   showFretNumbers: boolean;
   fretRange: number;
   displayMode: 'notes' | 'intervals' | 'degrees';
+  noteSpelling?: 'auto' | 'sharps' | 'flats';
 }
 
 // Create a shareable URL with configuration
@@ -252,6 +253,9 @@ export function createShareableUrl(config: ShareableConfig): string {
   params.set('frets', config.showFretNumbers.toString());
   params.set('range', String(config.fretRange));
   params.set('mode', config.displayMode);
+  if (config.noteSpelling) {
+    params.set('spelling', config.noteSpelling);
+  }
   
   return `${baseUrl}?${params.toString()}`;
 }
@@ -273,7 +277,8 @@ export function parseConfigFromUrl(): Partial<ShareableConfig> | null {
       showNotes: params.get('notes') === 'true',
       showIntervals: params.get('intervals') === 'true',
       showFretNumbers: params.get('frets') === 'true',
-      displayMode: (params.get('mode') as 'notes' | 'intervals' | 'degrees') || 'notes'
+      displayMode: (params.get('mode') as 'notes' | 'intervals' | 'degrees') || 'notes',
+      noteSpelling: (params.get('spelling') as 'auto' | 'sharps' | 'flats') || undefined
     };
     
     const rangeParam = params.get('range');
