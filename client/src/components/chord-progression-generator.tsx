@@ -90,7 +90,9 @@ export default function ChordProgressionGenerator({
     // Play chord progression
     playbackIntervalRef.current = setInterval(() => {
       setCurrentChordIndex(prev => {
-        const nextIndex = (prev + 1) % chordProgression.length;
+        const safePrev = typeof prev === 'number' ? prev : -1;
+        const length = chordProgression.length || 1;
+        const nextIndex = (safePrev + 1) % length;
         if (nextIndex === 0) {
           // Loop back to beginning
           return 0;
@@ -158,6 +160,10 @@ export default function ChordProgressionGenerator({
     const chordNotes = getChordNotes(selectedKey, scaleType, chordSymbol);
     if (onChordSelect) {
       onChordSelect(chordNotes);
+    }
+    // Audition chord on click
+    if (chordNotes && chordNotes.length > 0) {
+      audioEngine.playChord(chordNotes, '2n');
     }
   };
 
@@ -239,6 +245,16 @@ export default function ChordProgressionGenerator({
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  // Trigger audio when chord index changes during playback
+  useEffect(() => {
+    if (!isPlaying) return;
+    if (!chordProgression || chordProgression.length === 0) return;
+    if (currentChordIndex === null) return;
+    const current = chordProgression[currentChordIndex];
+    if (!current || !current.notes || current.notes.length === 0) return;
+    audioEngine.playChord(current.notes, '2n');
+  }, [isPlaying, currentChordIndex, chordProgression]);
 
   return (
     <Card>
