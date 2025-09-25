@@ -1,8 +1,10 @@
 import { Music } from "lucide-react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FretboardNote, formatNoteForDisplay, NoteSpellingPolicy, SCALES } from "@/lib/music-theory";
 import { audioEngine } from "@/lib/audio";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface FretboardProps {
   guitarType: number;
@@ -37,6 +39,7 @@ export default function Fretboard({
   currentScale,
   fretboardNotes
 }: FretboardProps) {
+  const [chordTableType, setChordTableType] = useState<"triads" | "sevenths">("triads");
   const fretWidth = 70;
   const stringSpacing = 35;
   const nutX = 50;
@@ -84,6 +87,54 @@ export default function Fretboard({
       const rootDisp = formatNoteForDisplay(n0, noteSpelling, rootNote);
       const chordName = `${rootDisp} ${quality.toLowerCase()}`;
       const notes = [n0, n1, n2].map(x => formatNoteForDisplay(x, noteSpelling, rootNote));
+
+      items.push({ degree, chordName, notes, quality });
+    }
+    return items;
+  })();
+
+  const diatonicSevenths = (() => {
+    const scale = SCALES[scaleType as keyof typeof SCALES];
+    if (!scale) return [] as { degree: string; chordName: string; notes: string[]; quality: string }[];
+    const intervals = scale.intervals;
+    const degreeCount = intervals.length;
+    if (degreeCount < 4 || !currentScale?.notes?.length) return [] as { degree: string; chordName: string; notes: string[]; quality: string }[];
+
+    const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII"]; // fallback up to 7
+    const items: { degree: string; chordName: string; notes: string[]; quality: string }[] = [];
+
+    for (let i = 0; i < Math.min(degreeCount, 7); i++) {
+      const j0 = i;
+      const j1 = (i + 2) % degreeCount;
+      const j2 = (i + 4) % degreeCount;
+      const j3 = (i + 6) % degreeCount;
+
+      const n0 = currentScale.notes[j0];
+      const n1 = currentScale.notes[j1];
+      const n2 = currentScale.notes[j2];
+      const n3 = currentScale.notes[j3];
+
+      const t3 = (intervals[j1] - intervals[j0] + 12) % 12;
+      const t5 = (intervals[j2] - intervals[j0] + 12) % 12;
+      const t7 = (intervals[j3] - intervals[j0] + 12) % 12;
+
+      // Determine 7th chord quality
+      let quality = "Other";
+      let suffix = "";
+      if (t3 === 4 && t5 === 7 && t7 === 11) { quality = "Major 7"; suffix = "maj7"; }
+      else if (t3 === 4 && t5 === 7 && t7 === 10) { quality = "Dominant 7"; suffix = "7"; }
+      else if (t3 === 3 && t5 === 7 && t7 === 10) { quality = "Minor 7"; suffix = "m7"; }
+      else if (t3 === 3 && t5 === 6 && t7 === 10) { quality = "Half-diminished"; suffix = "m7♭5"; }
+      else if (t3 === 3 && t5 === 6 && t7 === 9) { quality = "Diminished 7"; suffix = "dim7"; }
+
+      const romanBase = (quality.includes("Minor") || quality.includes("diminished"))
+        ? romanNumerals[i].toLowerCase()
+        : romanNumerals[i];
+      const degree = quality.includes("diminished") ? `${romanBase}°` : romanBase;
+
+      const rootDisp = formatNoteForDisplay(n0, noteSpelling, rootNote);
+      const chordName = suffix ? `${rootDisp} ${suffix}` : `${rootDisp}`;
+      const notes = [n0, n1, n2, n3].map(x => formatNoteForDisplay(x, noteSpelling, rootNote));
 
       items.push({ degree, chordName, notes, quality });
     }
@@ -349,8 +400,22 @@ export default function Fretboard({
           </div>
 
           {/* Diatonic Triads Table */}
-          {diatonicTable.length > 0 && (
+          {(diatonicTable.length > 0 || diatonicSevenths.length > 0) && (
             <div className="mt-2">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium text-slate-700">Diatonic Chords</div>
+                <div className="w-40">
+                  <Select value={chordTableType} onValueChange={(v: string) => setChordTableType(v as "triads" | "sevenths")}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="triads">Triads</SelectItem>
+                      <SelectItem value="sevenths">Sevenths</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -361,7 +426,7 @@ export default function Fretboard({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {diatonicTable.map((row, idx) => (
+                  {(chordTableType === "triads" ? diatonicTable : diatonicSevenths).map((row, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="font-medium">{row.degree}</TableCell>
                       <TableCell>{row.chordName}</TableCell>
