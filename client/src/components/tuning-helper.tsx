@@ -174,7 +174,8 @@ export default function TuningHelper({ guitarType, tuning }: TuningHelperProps) 
           </Label>
           
           <div className="grid gap-2">
-            {tuning.slice(0, guitarType).map((note, index) => {
+            {[...tuning.slice(0, guitarType)].reverse().map((note, idx) => {
+              const index = guitarType - 1 - idx;
               const stringNumber = index + 1;
               const isCurrentlyPlaying = isPlaying === index;
               

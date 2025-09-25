@@ -166,10 +166,10 @@ export default function Fretboard({
           </div>
         </div>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-hidden">
           <svg
             viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-            className="w-full h-auto min-w-[800px]"
+            className="w-full h-auto min-w-[800px] max-w-full"
             style={{ background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)" }}
           >
             {/* Nut */}
