@@ -1,25 +1,6 @@
-import * as Tone from "tone";
-
-// Note frequencies in Hz (4th octave)
-const NOTE_FREQUENCIES: Record<string, number> = {
-  "C": 261.63,
-  "C#": 277.18,
-  "Db": 277.18,
-  "D": 293.66,
-  "D#": 311.13,
-  "Eb": 311.13,
-  "E": 329.63,
-  "F": 349.23,
-  "F#": 369.99,
-  "Gb": 369.99,
-  "G": 392.00,
-  "G#": 415.30,
-  "Ab": 415.30,
-  "A": 440.00,
-  "A#": 466.16,
-  "Bb": 466.16,
-  "B": 493.88
-};
+import * as Soundfont from "soundfont-player";
+import type { InstrumentName } from "soundfont-player";
+import { normalizeNote, NOTES } from "@/lib/music-theory";
 
 // Guitar string octaves (standard tuning as reference)
 const STRING_OCTAVES: Record<number, number[]> = {
@@ -29,105 +10,36 @@ const STRING_OCTAVES: Record<number, number[]> = {
 };
 
 // Audio tone options
-export interface AudioToneSettings {
-  type: 'acoustic' | 'electric' | 'clean' | 'distorted' | 'bass';
-  attack: number;
-  decay: number;
-  sustain: number;
-  release: number;
-}
-
-const TONE_PRESETS: Record<string, AudioToneSettings> = {
-  acoustic: {
-    type: 'acoustic',
-    attack: 0.01,
-    decay: 0.2,
-    sustain: 0.3,
-    release: 1.0
-  },
-  electric: {
-    type: 'electric',
-    attack: 0.05,
-    decay: 0.1,
-    sustain: 0.6,
-    release: 0.5
-  },
-  clean: {
-    type: 'clean',
-    attack: 0.02,
-    decay: 0.1,
-    sustain: 0.4,
-    release: 0.8
-  },
-  distorted: {
-    type: 'distorted',
-    attack: 0.01,
-    decay: 0.05,
-    sustain: 0.8,
-    release: 0.3
-  },
-  bass: {
-    type: 'bass',
-    attack: 0.02,
-    decay: 0.3,
-    sustain: 0.7,
-    release: 1.2
-  }
-};
+export type AudioInstrument = 'acoustic' | 'electric' | 'clean' | 'distorted' | 'bass';
 
 class AudioEngine {
-  private synth: Tone.Synth | null = null;
+  private ac: AudioContext | null = null;
+  private instrument: any | null = null;
   private volume = 0.5;
   private isMuted = false;
-  private currentTone: AudioToneSettings = TONE_PRESETS.acoustic;
+  private currentInstrument: AudioInstrument = 'acoustic';
   private isPlaying = false;
-  private playbackQueue: Array<{ frequency: number; time: number; duration: string }> = [];
 
   async initialize() {
-    try {
-      if (!this.synth) {
-        // Ensure Tone.js context is started with user interaction
-        if (Tone.context.state !== 'running') {
-          await Tone.start();
-        }
-        this.createSynth();
-      }
-      return this.synth;
-    } catch (error) {
-      console.error('Audio initialization failed:', error);
-      throw new Error('Audio not available - user interaction required');
+    if (!this.ac) {
+      this.ac = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
+    if (!this.instrument) {
+      const name = this.getSoundfontName(this.currentInstrument);
+      this.instrument = await Soundfont.instrument(this.ac, name);
+    }
+    return this.instrument;
   }
 
-  private createSynth() {
-    if (this.synth) {
-      this.synth.dispose();
-    }
-
-    const oscillatorType = this.getOscillatorType(this.currentTone.type);
-    
-    this.synth = new Tone.Synth({
-      oscillator: {
-        type: oscillatorType as any
-      },
-      envelope: {
-        attack: this.currentTone.attack,
-        decay: this.currentTone.decay,
-        sustain: this.currentTone.sustain,
-        release: this.currentTone.release
-      }
-    }).toDestination();
-  }
-
-  private getOscillatorType(toneType: string): string {
-    switch (toneType) {
-      case 'acoustic': return 'triangle';
-      case 'electric': return 'sawtooth';
-      case 'clean': return 'sine';
-      case 'distorted': return 'square';
-      case 'bass': return 'sawtooth';
-      default: return 'triangle';
-    }
+  private getSoundfontName(instr: AudioInstrument): InstrumentName {
+    const map: Record<AudioInstrument, InstrumentName> = {
+      electric: 'electric_guitar_clean',
+      clean: 'electric_guitar_clean',
+      distorted: 'distortion_guitar',
+      bass: 'acoustic_bass',
+      acoustic: 'acoustic_guitar_nylon'
+    };
+    return map[instr];
   }
 
   setVolume(volume: number) {
@@ -138,56 +50,51 @@ class AudioEngine {
     this.isMuted = muted;
   }
 
-  setTone(toneType: string) {
-    if (TONE_PRESETS[toneType]) {
-      this.currentTone = TONE_PRESETS[toneType];
-      this.createSynth();
-    }
+  setTone(toneType: AudioInstrument) {
+    this.currentInstrument = toneType;
+    // Recreate instrument lazily on next initialize
+    this.instrument = null;
   }
 
   getToneOptions() {
-    return Object.keys(TONE_PRESETS);
+    return ['acoustic', 'electric', 'clean', 'distorted', 'bass'];
   }
 
   getCurrentTone() {
-    return this.currentTone.type;
+    return this.currentInstrument;
   }
 
-  getStringFrequency(note: string, stringIndex: number, guitarType: number): number {
-    const baseFreq = NOTE_FREQUENCIES[note];
-    if (!baseFreq) return 440; // Default to A4
-    
-    const octave = STRING_OCTAVES[guitarType]?.[stringIndex] || 3;
-    return baseFreq * Math.pow(2, octave - 4); // Adjust to correct octave
+  private getStringMidi(note: string, stringIndex: number, fret: number, guitarType: number): number {
+    const normalized = normalizeNote(note);
+    const noteIndex = NOTES.indexOf(normalized);
+    const octave = STRING_OCTAVES[guitarType]?.[stringIndex] ?? 3;
+    const baseMidi = (octave + 1) * 12 + noteIndex; // C-1=0, C4=60
+    return baseMidi + fret;
   }
 
-  getFretFrequency(note: string, stringIndex: number, fret: number, guitarType: number): number {
-    const openStringFreq = this.getStringFrequency(note, stringIndex, guitarType);
-    // Each fret is a semitone higher, frequency multiplier is 2^(1/12) per semitone
-    return openStringFreq * Math.pow(2, fret / 12);
+  private midiToNoteName(midi: number): string {
+    const noteIndex = midi % 12;
+    const octave = Math.floor(midi / 12) - 1;
+    const name = NOTES[noteIndex];
+    return `${name}${octave}`;
   }
 
-  async playNote(frequency: number, duration = "8n") {
+  async playNoteName(noteName: string, durationSeconds = 0.5) {
     try {
-      const synth = await this.initialize();
-      if (!synth) {
-        throw new Error('Audio synthesis not available');
-      }
-      
-      const actualVolume = this.isMuted ? 0 : this.volume;
-      
-      synth.volume.value = Tone.gainToDb(actualVolume);
-      synth.triggerAttackRelease(frequency, duration);
-      
+      const instr = await this.initialize();
+      if (!instr || !this.ac) return;
+      const when = this.ac.currentTime;
+      const gain = this.isMuted ? 0 : this.volume;
+      instr.play(noteName, when, { gain, duration: durationSeconds });
     } catch (error) {
-      console.error("Audio playback error:", error);
-      throw error; // Re-throw to handle in UI
+      console.error('Audio playback error:', error);
     }
   }
 
   async playFretboardNote(note: string, stringIndex: number, fret: number, guitarType: number) {
-    const frequency = this.getFretFrequency(note, stringIndex, fret, guitarType);
-    await this.playNote(frequency, "4n");
+    const midi = this.getStringMidi(note, stringIndex, fret, guitarType);
+    const noteName = this.midiToNoteName(midi);
+    await this.playNoteName(noteName, 0.5);
   }
 
   // Play a scale pattern
@@ -198,20 +105,15 @@ class AudioEngine {
     }
 
     this.isPlaying = true;
-    const noteDuration = Tone.Time(noteLength).toSeconds();
-    const intervalTime = (60 / tempo) * (Tone.Time("4n").toSeconds() / Tone.Time(noteLength).toSeconds());
+    const secondsPerBeat = 60 / tempo;
+    const intervalTime = secondsPerBeat; // simple beat per note
 
     try {
-      const synth = await this.initialize();
-      if (!synth) return;
+      await this.initialize();
       
       for (let i = 0; i < notes.length && this.isPlaying; i++) {
-        const frequency = NOTE_FREQUENCIES[normalizeNote(notes[i])] || 440;
-        
-        const actualVolume = this.isMuted ? 0 : this.volume;
-        synth.volume.value = Tone.gainToDb(actualVolume);
-        
-        synth.triggerAttackRelease(frequency, noteLength);
+        const name = `${normalizeNote(notes[i])}4`;
+        await this.playNoteName(name, intervalTime * 0.9);
         
         // Wait for the interval before playing the next note
         await new Promise(resolve => setTimeout(resolve, intervalTime * 1000));
@@ -231,23 +133,15 @@ class AudioEngine {
     }
 
     this.isPlaying = true;
-    const chordTime = Tone.Time(chordDuration).toSeconds();
-    const intervalTime = (60 / tempo) * (Tone.Time("4n").toSeconds() / Tone.Time(chordDuration).toSeconds());
+    const intervalTime = 60 / tempo * 2; // approx half-note per chord
 
     try {
-      const synth = await this.initialize();
-      if (!synth) return;
+      await this.initialize();
       
       for (let i = 0; i < chords.length && this.isPlaying; i++) {
         const chord = chords[i];
-        const actualVolume = this.isMuted ? 0 : this.volume;
-        synth.volume.value = Tone.gainToDb(actualVolume);
-        
-        // Play all notes in the chord simultaneously
-        chord.forEach(note => {
-          const frequency = NOTE_FREQUENCIES[normalizeNote(note)] || 440;
-          synth.triggerAttackRelease(frequency, chordDuration);
-        });
+        // Play all notes in the chord simultaneously (use 4th octave)
+        await Promise.all(chord.map(n => this.playNoteName(`${normalizeNote(n)}4`, intervalTime * 0.95)));
         
         // Wait for the chord duration before playing the next chord
         await new Promise(resolve => setTimeout(resolve, intervalTime * 1000));
@@ -262,14 +156,8 @@ class AudioEngine {
   // Play a single chord (all notes simultaneously)
   async playChord(notes: string[], duration: string = "2n") {
     try {
-      const synth = await this.initialize();
-      if (!synth) return;
-      const actualVolume = this.isMuted ? 0 : this.volume;
-      synth.volume.value = Tone.gainToDb(actualVolume);
-      notes.forEach(note => {
-        const frequency = NOTE_FREQUENCIES[normalizeNote(note)] || 440;
-        synth.triggerAttackRelease(frequency, duration);
-      });
+      await this.initialize();
+      await Promise.all(notes.map(n => this.playNoteName(`${normalizeNote(n)}4`, 1.5)));
     } catch (error) {
       console.error('Chord playback error:', error);
     }
@@ -283,24 +171,15 @@ class AudioEngine {
     }
 
     this.isPlaying = true;
-    const noteLength = "8n";
-    const intervalTime = (60 / tempo) * (Tone.Time("4n").toSeconds() / Tone.Time(noteLength).toSeconds());
+    const secondsPerBeat = 60 / tempo;
 
     try {
-      const synth = await this.initialize();
-      if (!synth) return;
-      
+      await this.initialize();
       for (let i = 0; i < pattern.length && this.isPlaying; i++) {
-        const noteIndex = pattern[i] % notes.length;
-        const note = notes[noteIndex];
-        const frequency = NOTE_FREQUENCIES[normalizeNote(note)] || 440;
-        
-        const actualVolume = this.isMuted ? 0 : this.volume;
-        synth.volume.value = Tone.gainToDb(actualVolume);
-        
-        synth.triggerAttackRelease(frequency, noteLength);
-        
-        await new Promise(resolve => setTimeout(resolve, intervalTime * 1000));
+        const idx = Math.abs(pattern[i]) % notes.length;
+        const name = `${normalizeNote(notes[idx])}4`;
+        await this.playNoteName(name, secondsPerBeat * 0.9);
+        await new Promise(resolve => setTimeout(resolve, secondsPerBeat * 1000));
       }
     } catch (error) {
       console.error("Arpeggio playback error:", error);
@@ -311,7 +190,6 @@ class AudioEngine {
 
   stopPlayback() {
     this.isPlaying = false;
-    this.playbackQueue = [];
   }
 
   isCurrentlyPlaying() {
@@ -319,9 +197,10 @@ class AudioEngine {
   }
 
   dispose() {
-    if (this.synth) {
-      this.synth.dispose();
-      this.synth = null;
+    this.instrument = null;
+    if (this.ac) {
+      this.ac.close();
+      this.ac = null;
     }
   }
 }
@@ -330,15 +209,4 @@ class AudioEngine {
 export const audioEngine = new AudioEngine();
 
 // Helper function to normalize note names
-export function normalizeNote(note: string): string {
-  // Convert flat notes to sharp equivalents for consistency
-  const noteMap: Record<string, string> = {
-    'Db': 'C#',
-    'Eb': 'D#',
-    'Gb': 'F#',
-    'Ab': 'G#',
-    'Bb': 'A#'
-  };
-  
-  return noteMap[note] || note;
-}
+export { normalizeNote };

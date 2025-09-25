@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import * as Tone from "tone";
 import { normalizeNote } from "@/lib/music-theory";
 
 interface TuningHelperProps {
@@ -39,28 +38,9 @@ export default function TuningHelper({ guitarType, tuning }: TuningHelperProps) 
   const [isPlaying, setIsPlaying] = useState<number | null>(null);
   const [volume, setVolume] = useState([0.5]);
   const [isMuted, setIsMuted] = useState(false);
-  const [synth, setSynth] = useState<Tone.Synth | null>(null);
+  const [synth, setSynth] = useState<null>(null);
 
-  const initializeSynth = useCallback(async () => {
-    if (!synth) {
-      await Tone.start();
-      const newSynth = new Tone.Synth({
-        oscillator: {
-          type: "sawtooth"
-        },
-        envelope: {
-          attack: 0.1,
-          decay: 0.2,
-          sustain: 0.3,
-          release: 1
-        }
-      }).toDestination();
-      
-      setSynth(newSynth);
-      return newSynth;
-    }
-    return synth;
-  }, [synth]);
+  const initializeSynth = useCallback(async () => null, []);
 
   const getStringFrequency = (note: string, stringIndex: number): number => {
     const baseFreq = NOTE_FREQUENCIES[normalizeNote(note)];
@@ -78,11 +58,20 @@ export default function TuningHelper({ guitarType, tuning }: TuningHelperProps) 
 
       const frequency = getStringFrequency(note, stringIndex);
       const actualVolume = isMuted ? 0 : volume[0];
-      
-      currentSynth.volume.value = Tone.gainToDb(actualVolume);
-      
+      // Use WebAudio oscillator for simple beep (fallback) until unified engine used here
+      const ac = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ac.createOscillator();
+      const gainNode = ac.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = frequency;
+      gainNode.gain.value = actualVolume;
+      osc.connect(gainNode).connect(ac.destination);
+      osc.start();
       setIsPlaying(stringIndex);
-      currentSynth.triggerAttackRelease(frequency, "2n");
+      setTimeout(() => {
+        osc.stop();
+        ac.close();
+      }, 500);
       
       // Stop playing indicator after note duration
       setTimeout(() => {
@@ -104,9 +93,7 @@ export default function TuningHelper({ guitarType, tuning }: TuningHelperProps) 
   };
 
   const stopAll = () => {
-    if (synth) {
-      synth.triggerRelease();
-    }
+    // No-op for oscillator fallback
     setIsPlaying(null);
   };
 

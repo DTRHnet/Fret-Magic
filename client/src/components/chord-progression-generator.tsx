@@ -55,8 +55,8 @@ export default function ChordProgressionGenerator({
   const [showAsciiTab, setShowAsciiTab] = useState<boolean>(true);
   const [showRealtimeFretboard, setShowRealtimeFretboard] = useState<boolean>(true);
   
-  const playbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const beatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const playbackIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const beatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Generate chord progression based on scale
   const chordProgression = useMemo(() => {
@@ -89,7 +89,7 @@ export default function ChordProgressionGenerator({
     
     // Play chord progression
     playbackIntervalRef.current = setInterval(() => {
-      setCurrentChordIndex(prev => {
+      setCurrentChordIndex((prev: number | null) => {
         const safePrev = typeof prev === 'number' ? prev : -1;
         const length = chordProgression.length || 1;
         const nextIndex = (safePrev + 1) % length;
@@ -103,7 +103,7 @@ export default function ChordProgressionGenerator({
     
     // Update beat counter
     beatIntervalRef.current = setInterval(() => {
-      setCurrentBeat(prev => (prev + 1) % timeSignature.beats);
+      setCurrentBeat((prev: number) => (prev + 1) % timeSignature.beats);
     }, beatDuration);
   };
 
@@ -301,7 +301,7 @@ export default function ChordProgressionGenerator({
           {/* Key Selection */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Key</label>
-            <Select value={selectedKey} onValueChange={setSelectedKey}>
+            <Select value={selectedKey} onValueChange={(value: string) => setSelectedKey(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -318,7 +318,7 @@ export default function ChordProgressionGenerator({
           {/* Progression Template */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Progression</label>
-            <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+            <Select value={selectedTemplate} onValueChange={(value: string) => setSelectedTemplate(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -335,7 +335,7 @@ export default function ChordProgressionGenerator({
           {/* Time Signature */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Time Signature</label>
-            <Select value={selectedTimeSignature} onValueChange={setSelectedTimeSignature}>
+            <Select value={selectedTimeSignature} onValueChange={(value: string) => setSelectedTimeSignature(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
