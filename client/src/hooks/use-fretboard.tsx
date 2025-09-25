@@ -7,7 +7,8 @@ export function useFretboard() {
   const [tuning, setTuning] = useState<string[]>(getDefaultTuningForGuitarType(6));
   const [rootNote, setRootNote] = useState<string>("C");
   const [scaleType, setScaleType] = useState<string>("ionian");
-  const [displayMode, setDisplayMode] = useState<"notes" | "intervals">("notes");
+  const [displayMode, setDisplayMode] = useState<"notes" | "intervals" | "degrees">("notes");
+  const [noteSpelling, setNoteSpelling] = useState<"auto" | "sharps" | "flats">("auto");
   const [fretRange, setFretRange] = useState<number>(15);
   const [showOptions, setShowOptions] = useState({
     rootNotes: false, // Show all notes by default
@@ -43,6 +44,8 @@ export function useFretboard() {
     setScaleType,
     displayMode,
     setDisplayMode,
+    noteSpelling,
+    setNoteSpelling,
     fretRange,
     setFretRange,
     showOptions,

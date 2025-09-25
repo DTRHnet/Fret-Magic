@@ -235,7 +235,7 @@ export interface ShareableConfig {
   showIntervals: boolean;
   showFretNumbers: boolean;
   fretRange: number;
-  displayMode: 'notes' | 'intervals';
+  displayMode: 'notes' | 'intervals' | 'degrees';
 }
 
 // Create a shareable URL with configuration
@@ -273,7 +273,7 @@ export function parseConfigFromUrl(): Partial<ShareableConfig> | null {
       showNotes: params.get('notes') === 'true',
       showIntervals: params.get('intervals') === 'true',
       showFretNumbers: params.get('frets') === 'true',
-      displayMode: (params.get('mode') as 'notes' | 'intervals') || 'notes'
+      displayMode: (params.get('mode') as 'notes' | 'intervals' | 'degrees') || 'notes'
     };
     
     const rangeParam = params.get('range');

@@ -36,6 +36,8 @@ export default function Home() {
     setScaleType,
     displayMode,
     setDisplayMode,
+    noteSpelling,
+    setNoteSpelling,
     fretRange,
     setFretRange,
     showOptions,
@@ -269,8 +271,10 @@ export default function Home() {
             
             <div id="display-controls">
               <DisplayControls
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
+                displayMode={displayMode as "notes" | "intervals" | "degrees"}
+                setDisplayMode={setDisplayMode as (m: "notes" | "intervals" | "degrees") => void}
+                noteSpelling={noteSpelling}
+                setNoteSpelling={setNoteSpelling}
                 fretRange={fretRange}
                 setFretRange={setFretRange}
                 showOptions={showOptions}
@@ -287,6 +291,7 @@ export default function Home() {
                 rootNote={rootNote}
                 scaleType={scaleType}
                 displayMode={displayMode}
+                noteSpelling={noteSpelling}
                 fretRange={fretRange}
                 showOptions={showOptions}
                 currentScale={currentScale}
@@ -386,8 +391,10 @@ export default function Home() {
             
             <div id="display-controls">
               <DisplayControls
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
+                displayMode={displayMode as "notes" | "intervals" | "degrees"}
+                setDisplayMode={setDisplayMode as (m: "notes" | "intervals" | "degrees") => void}
+                noteSpelling={noteSpelling}
+                setNoteSpelling={setNoteSpelling}
                 fretRange={fretRange}
                 setFretRange={setFretRange}
                 showOptions={showOptions}
@@ -421,6 +428,7 @@ export default function Home() {
                 rootNote={rootNote}
                 scaleType={scaleType}
                 displayMode={displayMode}
+                noteSpelling={noteSpelling}
                 fretRange={fretRange}
                 showOptions={showOptions}
                 currentScale={currentScale}

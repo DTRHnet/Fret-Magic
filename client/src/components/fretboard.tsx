@@ -1,6 +1,6 @@
 import { Music } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { FretboardNote } from "@/lib/music-theory";
+import { FretboardNote, formatNoteForDisplay, NoteSpellingPolicy } from "@/lib/music-theory";
 import { audioEngine } from "@/lib/audio";
 
 interface FretboardProps {
@@ -8,7 +8,8 @@ interface FretboardProps {
   tuning: string[];
   rootNote: string;
   scaleType: string;
-  displayMode: "notes" | "intervals";
+  displayMode: "notes" | "intervals" | "degrees";
+  noteSpelling?: NoteSpellingPolicy;
   fretRange: number;
   showOptions: {
     rootNotes: boolean;
@@ -29,6 +30,7 @@ export default function Fretboard({
   rootNote,
   scaleType,
   displayMode,
+  noteSpelling = 'auto',
   fretRange,
   showOptions,
   currentScale,
@@ -78,7 +80,23 @@ export default function Fretboard({
       : startX + (fretIndex - 2) * fretWidth + fretWidth / 2;
     const y = startY + (guitarType - 1 - stringIndex) * stringSpacing;
     
-    const displayText = displayMode === "notes" ? note.note : note.interval;
+    const displayText = displayMode === "notes"
+      ? formatNoteForDisplay(note.note, noteSpelling, rootNote)
+      : displayMode === "intervals"
+        ? note.interval
+        : note.isRoot
+          ? "1"
+          : note.interval === "2" ? "2" :
+            note.interval === "b2" ? "b2" :
+            note.interval === "b3" ? "b3" :
+            note.interval === "3" ? "3" :
+            note.interval === "4" ? "4" :
+            note.interval === "b5" ? "b5" :
+            note.interval === "5" ? "5" :
+            note.interval === "b6" ? "b6" :
+            note.interval === "6" ? "6" :
+            note.interval === "b7" ? "b7" :
+            note.interval === "7" ? "7" : "";
     
     return (
       <g 
@@ -191,12 +209,14 @@ export default function Fretboard({
             ))}
             
             {/* Fret Markers */}
-            {[3, 5, 7, 9, 12].map((fret) => {
+            {[3, 5, 7, 9, 12, 15, 17, 19, 21, 24].map((fret) => {
               if (fret > fretRange) return null;
-              const x = startX + (fret - 2) * fretWidth + fretWidth / 2;
+              const x = fret === 1
+                ? nutX + fretWidth / 2
+                : startX + (fret - 2) * fretWidth + fretWidth / 2;
               const centerY = startY + ((guitarType - 1) * stringSpacing) / 2;
               
-              if (fret === 12) {
+              if (fret === 12 || fret === 24) {
                 // Double marker for 12th fret
                 return (
                   <g key={fret}>

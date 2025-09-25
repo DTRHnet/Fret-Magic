@@ -363,6 +363,37 @@ export function getNoteAtIndex(index: number): string {
   return NOTES[index % 12];
 }
 
+export type NoteSpellingPolicy = 'auto' | 'sharps' | 'flats';
+
+const FLAT_EQUIVS: Record<string, string> = {
+  'C#': 'Db',
+  'D#': 'Eb',
+  'F#': 'Gb',
+  'G#': 'Ab',
+  'A#': 'Bb'
+};
+
+const SHARP_KEYS = new Set(['G', 'D', 'A', 'E', 'B', 'F#', 'C#']);
+const FLAT_KEYS = new Set(['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb']);
+
+export function formatNoteForDisplay(
+  note: string,
+  policy: NoteSpellingPolicy,
+  keyRoot?: string
+): string {
+  const n = normalizeNote(note);
+  if (policy === 'sharps') return n;
+  if (policy === 'flats') return FLAT_EQUIVS[n] || n;
+  const root = formatNoteName(keyRoot || '');
+  if (root && (root.includes('b') || FLAT_KEYS.has(root))) {
+    return FLAT_EQUIVS[n] || n;
+  }
+  if (root && (root.includes('#') || SHARP_KEYS.has(root))) {
+    return n;
+  }
+  return n;
+}
+
 export function getScaleNotes(rootNote: string, scaleType: string): string[] {
   const scale = SCALES[scaleType as keyof typeof SCALES];
   if (!scale) return [];

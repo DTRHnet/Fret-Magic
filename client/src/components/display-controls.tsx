@@ -7,8 +7,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface DisplayControlsProps {
-  displayMode: "notes" | "intervals";
-  setDisplayMode: (mode: "notes" | "intervals") => void;
+  displayMode: "notes" | "intervals" | "degrees";
+  setDisplayMode: (mode: "notes" | "intervals" | "degrees") => void;
+  noteSpelling?: "auto" | "sharps" | "flats";
+  setNoteSpelling?: (policy: "auto" | "sharps" | "flats") => void;
   fretRange: number;
   setFretRange: (range: number) => void;
   showOptions: {
@@ -26,6 +28,8 @@ interface DisplayControlsProps {
 export default function DisplayControls({
   displayMode,
   setDisplayMode,
+  noteSpelling,
+  setNoteSpelling,
   fretRange,
   setFretRange,
   showOptions,
@@ -62,6 +66,46 @@ export default function DisplayControls({
                 >
                   Intervals
                 </Button>
+                <Button
+                  variant={displayMode === "degrees" ? "default" : "ghost"}
+                  size="sm"
+                  className="flex-1 h-8"
+                  onClick={() => setDisplayMode("degrees")}
+                >
+                  Degrees
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-slate-700 mb-2 block">
+                Note Spelling
+              </Label>
+              <div className="flex items-center space-x-1 bg-slate-100 rounded-lg p-1">
+                <Button
+                  variant={noteSpelling === "auto" ? "default" : "ghost"}
+                  size="sm"
+                  className="flex-1 h-8"
+                  onClick={() => setNoteSpelling && setNoteSpelling("auto")}
+                >
+                  Auto (Key)
+                </Button>
+                <Button
+                  variant={noteSpelling === "sharps" ? "default" : "ghost"}
+                  size="sm"
+                  className="flex-1 h-8"
+                  onClick={() => setNoteSpelling && setNoteSpelling("sharps")}
+                >
+                  Sharps
+                </Button>
+                <Button
+                  variant={noteSpelling === "flats" ? "default" : "ghost"}
+                  size="sm"
+                  className="flex-1 h-8"
+                  onClick={() => setNoteSpelling && setNoteSpelling("flats")}
+                >
+                  Flats
+                </Button>
               </div>
             </div>
             
@@ -71,7 +115,7 @@ export default function DisplayControls({
               </Label>
               <Slider
                 value={[fretRange]}
-                onValueChange={(value) => setFretRange(value[0])}
+                onValueChange={(value: number[]) => setFretRange(value[0])}
                 min={12}
                 max={24}
                 step={1}
@@ -91,7 +135,7 @@ export default function DisplayControls({
                     ? "root"
                     : "scale"
                 }
-                onValueChange={(value) => {
+                onValueChange={(value: string) => {
                   if (value === "all") {
                     setShowOptions({ ...showOptions, rootNotes: false, scaleNotes: false });
                   } else if (value === "root") {
@@ -128,7 +172,7 @@ export default function DisplayControls({
                 <Checkbox
                   id="show-frets"
                   checked={showOptions.fretNumbers}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={(checked: boolean | "indeterminate") =>
                     setShowOptions({ ...showOptions, fretNumbers: !!checked })
                   }
                 />
