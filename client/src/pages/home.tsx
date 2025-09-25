@@ -474,7 +474,6 @@ export default function Home() {
                 fretRange={fretRange}
                 displayMode={displayMode}
                 noteSpelling={noteSpelling}
-                noteSpelling={noteSpelling}
                 currentScale={currentScale}
               />
             </div>
