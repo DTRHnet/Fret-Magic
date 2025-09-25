@@ -1,10 +1,11 @@
 import { Guitar } from "lucide-react";
+import type { ChangeEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TUNING_PRESETS } from "@/lib/guitar-data";
-import { validateNote } from "@/lib/music-theory";
+import { validateNote, formatNoteName } from "@/lib/music-theory";
 
 interface GuitarControlsProps {
   guitarType: number;
@@ -51,10 +52,9 @@ export default function GuitarControls({
 
   const handleCustomTuningChange = (index: number, value: string) => {
     const newTuning = [...tuning];
-    const upperValue = value.toUpperCase();
-    
-    if (validateNote(upperValue) || upperValue === "") {
-      newTuning[index] = upperValue;
+    const formatted = formatNoteName(value);
+    if (validateNote(formatted) || formatted === "") {
+      newTuning[index] = formatted;
       setTuning(newTuning);
     }
   };
@@ -72,7 +72,7 @@ export default function GuitarControls({
             <Label htmlFor="guitar-type" className="text-sm font-medium text-slate-700">
               Guitar Type
             </Label>
-            <Select value={guitarType.toString()} onValueChange={(value) => setGuitarType(parseInt(value))}>
+            <Select value={guitarType.toString()} onValueChange={(value: string) => setGuitarType(parseInt(value, 10))}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -115,7 +115,7 @@ export default function GuitarControls({
                   <Input
                     key={i}
                     value={tuning[i] || ""}
-                    onChange={(e) => handleCustomTuningChange(i, e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleCustomTuningChange(i, e.target.value)}
                     placeholder={`String ${i + 1}`}
                     className="text-center"
                     maxLength={2}

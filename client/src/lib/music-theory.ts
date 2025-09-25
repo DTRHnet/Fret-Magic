@@ -257,13 +257,13 @@ export const SCALES = {
   },
   "neapolitan-major": {
     name: "Neapolitan Major",
-    intervals: [0, 1, 3, 5, 7, 9, 11],
+    intervals: [0, 1, 4, 5, 7, 9, 11],
     pattern: "H-W-W-W-W-W-H",
     category: "exotic"
   },
   "hungarian-major": {
     name: "Hungarian Major",
-    intervals: [0, 3, 4, 6, 7, 9, 10],
+    intervals: [0, 3, 4, 6, 7, 9, 11],
     pattern: "WH-H-W-H-W-H-W",
     category: "exotic"
   },
@@ -313,21 +313,41 @@ export interface FretboardNote {
   noteIndex: number;
 }
 
+export function formatNoteName(note: string): string {
+  if (!note) return "";
+  let s = note.trim();
+  if (s === "") return "";
+  s = s.replace(/♭/g, "b").replace(/♯/g, "#");
+  const match = s.match(/^\s*([A-Ga-g])([#b])?\s*$/);
+  if (!match) return "";
+  const letter = match[1].toUpperCase();
+  const accidental = match[2] === "#" ? "#" : match[2] === "b" ? "b" : "";
+  return `${letter}${accidental}`;
+}
+
 export function validateNote(note: string): boolean {
-  const validNotes = ["A", "A#", "AB", "B", "C", "C#", "CB", "D", "D#", "DB", "E", "F", "F#", "FB", "G", "G#", "GB"];
-  return validNotes.includes(note.toUpperCase()) || note === "";
+  if (note === "") return true;
+  const formatted = formatNoteName(note);
+  return /^[A-G](#|b)?$/.test(formatted);
 }
 
 export function normalizeNote(note: string): string {
+  const formatted = formatNoteName(note);
+  if (formatted === "") return "";
   const noteMap: Record<string, string> = {
-    "AB": "G#",
-    "CB": "B",
-    "DB": "C#",
-    "EB": "D#",
-    "FB": "E",
-    "GB": "F#"
+    // Flats to sharps
+    "Db": "C#",
+    "Eb": "D#",
+    "Gb": "F#",
+    "Ab": "G#",
+    "Bb": "A#",
+    // Theoretical spellings
+    "Cb": "B",
+    "Fb": "E",
+    "E#": "F",
+    "B#": "C"
   };
-  return noteMap[note] || note;
+  return noteMap[formatted] || formatted;
 }
 
 export function getNoteIndex(note: string): number {

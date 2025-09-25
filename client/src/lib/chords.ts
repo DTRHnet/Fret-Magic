@@ -803,9 +803,19 @@ export function romanNumeralToChord(roman: string, rootNote: string, scaleType: 
   if (degree === undefined) return '';
 
   try {
-    const musicTheory = require('./music-theory');
-    const scale = musicTheory.SCALES[scaleType];
-    if (!scale) return '';
+    // Avoid CommonJS require in ESM; inline minimal scale map
+    const scaleMap: Record<string, { intervals: number[] }> = {
+      ionian: { intervals: [0,2,4,5,7,9,11] },
+      major: { intervals: [0,2,4,5,7,9,11] },
+      aeolian: { intervals: [0,2,3,5,7,8,10] },
+      minor: { intervals: [0,2,3,5,7,8,10] },
+      dorian: { intervals: [0,2,3,5,7,9,10] },
+      phrygian: { intervals: [0,1,3,5,7,8,10] },
+      lydian: { intervals: [0,2,4,6,7,9,11] },
+      mixolydian: { intervals: [0,2,4,5,7,9,10] },
+      locrian: { intervals: [0,1,3,5,6,8,10] }
+    };
+    const scale = scaleMap[scaleType] || scaleMap['ionian'];
 
     const rootIndex = CHROMATIC_NOTES.indexOf(rootNote);
     if (rootIndex === -1) return '';
@@ -815,8 +825,8 @@ export function romanNumeralToChord(roman: string, rootNote: string, scaleType: 
     );
 
     const chordRoot = scaleNotes[degree];
-    const isMinor = roman === roman.toLowerCase() || roman.includes('i');
-    const isDiminished = roman.includes('°');
+    const isMinor = roman === roman.toLowerCase() || /i/.test(roman);
+    const isDiminished = roman.includes('°') || roman.toLowerCase() === 'vii';
 
     let symbol = chordRoot;
     if (isDiminished) {
@@ -837,7 +847,7 @@ export function romanNumeralToChord(roman: string, rootNote: string, scaleType: 
 export interface DetectedChord {
   name: string;
   notes: string[];
-  quality: 'major' | 'minor' | 'dominished' | 'augmented' | 'dominant' | 'diminished';
+  quality: 'major' | 'minor' | 'augmented' | 'dominant' | 'diminished';
 }
 
 // Provide a list of common diatonic chords in the key
