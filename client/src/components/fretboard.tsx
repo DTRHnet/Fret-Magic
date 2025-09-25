@@ -1,6 +1,7 @@
 import { Music } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { FretboardNote, formatNoteForDisplay, NoteSpellingPolicy } from "@/lib/music-theory";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { FretboardNote, formatNoteForDisplay, NoteSpellingPolicy, SCALES } from "@/lib/music-theory";
 import { audioEngine } from "@/lib/audio";
 
 interface FretboardProps {
@@ -44,6 +45,50 @@ export default function Fretboard({
   
   const svgWidth = startX + (fretRange + 1) * fretWidth + 50;
   const svgHeight = startY + (guitarType - 1) * stringSpacing + 80;
+
+  // Build diatonic triads table (degree, chord name, notes, quality)
+  const diatonicTable = (() => {
+    const scale = SCALES[scaleType as keyof typeof SCALES];
+    if (!scale) return [] as { degree: string; chordName: string; notes: string[]; quality: string }[];
+    const intervals = scale.intervals;
+    const degreeCount = intervals.length;
+    if (degreeCount < 3 || !currentScale?.notes?.length) return [] as { degree: string; chordName: string; notes: string[]; quality: string }[];
+
+    const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII"]; // fallback up to 7
+
+    const items: { degree: string; chordName: string; notes: string[]; quality: string }[] = [];
+
+    for (let i = 0; i < Math.min(degreeCount, 7); i++) {
+      const j0 = i;
+      const j1 = (i + 2) % degreeCount;
+      const j2 = (i + 4) % degreeCount;
+
+      const n0 = currentScale.notes[j0];
+      const n1 = currentScale.notes[j1];
+      const n2 = currentScale.notes[j2];
+
+      const t3 = (intervals[j1] - intervals[j0] + 12) % 12;
+      const t5 = (intervals[j2] - intervals[j0] + 12) % 12;
+
+      let quality = "Other";
+      if (t3 === 4 && t5 === 7) quality = "Major";
+      else if (t3 === 3 && t5 === 7) quality = "Minor";
+      else if (t3 === 3 && t5 === 6) quality = "Diminished";
+      else if (t3 === 4 && t5 === 8) quality = "Augmented";
+
+      const degreeRoman = quality === "Minor" || quality === "Diminished"
+        ? romanNumerals[i].toLowerCase()
+        : romanNumerals[i];
+      const degree = quality === "Diminished" ? `${degreeRoman}°` : degreeRoman;
+
+      const rootDisp = formatNoteForDisplay(n0, noteSpelling, rootNote);
+      const chordName = `${rootDisp} ${quality.toLowerCase()}`;
+      const notes = [n0, n1, n2].map(x => formatNoteForDisplay(x, noteSpelling, rootNote));
+
+      items.push({ degree, chordName, notes, quality });
+    }
+    return items;
+  })();
 
   const handleNoteClick = async (stringIndex: number, fretIndex: number) => {
     try {
@@ -288,7 +333,7 @@ export default function Fretboard({
         
         {/* Scale Info Panel */}
         <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
             <div>
               <span className="font-medium text-slate-700">Scale:</span>
               <span className="ml-2 text-slate-600">{currentScale.name}</span>
@@ -302,6 +347,32 @@ export default function Fretboard({
               <span className="ml-2 text-slate-600">{currentScale.pattern}</span>
             </div>
           </div>
+
+          {/* Diatonic Triads Table */}
+          {diatonicTable.length > 0 && (
+            <div className="mt-2">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Scale Degree</TableHead>
+                    <TableHead>Chord Name</TableHead>
+                    <TableHead>Notes</TableHead>
+                    <TableHead>Quality</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {diatonicTable.map((row, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell className="font-medium">{row.degree}</TableCell>
+                      <TableCell>{row.chordName}</TableCell>
+                      <TableCell>{row.notes.join(" – ")}</TableCell>
+                      <TableCell>{row.quality}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
