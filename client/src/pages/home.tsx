@@ -18,6 +18,7 @@ import { TutorialButton } from "@/components/tutorial-mode";
 import ChordProgressionGenerator from "@/components/chord-progression-generator";
 import AudioControls from "@/components/audio-controls";
 import ShareControls from "@/components/share-controls";
+import ArpeggioGenerator from "@/components/arpeggio-generator";
 
 export default function Home() {
   const [forceCustomTuning, setForceCustomTuning] = useState(false);
@@ -462,6 +463,8 @@ export default function Home() {
                 scaleType={scaleType}
                 currentScale={currentScale}
               />
+
+              <ArpeggioGenerator onOverlay={(events)=>{ /* reserved for future fretboard overlay */ }} />
 
               <ShareControls
                 rootNote={rootNote}
