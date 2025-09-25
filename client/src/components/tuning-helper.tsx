@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { normalizeNote } from "@/lib/music-theory";
+import { audioEngine } from "@/lib/audio";
 
 interface TuningHelperProps {
   guitarType: number;
@@ -52,26 +53,11 @@ export default function TuningHelper({ guitarType, tuning }: TuningHelperProps) 
 
   const playNote = async (stringIndex: number) => {
     try {
-      const currentSynth = await initializeSynth();
       const note = tuning[stringIndex];
       if (!note) return;
-
-      const frequency = getStringFrequency(note, stringIndex);
-      const actualVolume = isMuted ? 0 : volume[0];
-      // Use WebAudio oscillator for simple beep (fallback) until unified engine used here
-      const ac = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = ac.createOscillator();
-      const gainNode = ac.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = frequency;
-      gainNode.gain.value = actualVolume;
-      osc.connect(gainNode).connect(ac.destination);
-      osc.start();
+      await audioEngine.setVolume(isMuted ? 0 : volume[0]);
       setIsPlaying(stringIndex);
-      setTimeout(() => {
-        osc.stop();
-        ac.close();
-      }, 500);
+      await audioEngine.playFretboardNote(note, stringIndex, 0, guitarType);
       
       // Stop playing indicator after note duration
       setTimeout(() => {
@@ -93,7 +79,7 @@ export default function TuningHelper({ guitarType, tuning }: TuningHelperProps) 
   };
 
   const stopAll = () => {
-    // No-op for oscillator fallback
+    audioEngine.stopPlayback();
     setIsPlaying(null);
   };
 
