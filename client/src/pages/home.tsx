@@ -310,76 +310,130 @@ export default function Home() {
             </Accordion>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div id="fretboard-container">
-              <Fretboard
-                guitarType={guitarType}
-                tuning={tuning}
-                rootNote={rootNote}
-                scaleType={scaleType}
-                displayMode={displayMode}
-                noteSpelling={noteSpelling}
-                fretRange={fretRange}
-                showOptions={showOptions}
-                currentScale={currentScale}
-                fretboardNotes={fretboardNotes}
-                overlays={overlay}
-              />
-            </div>
-            
-            <div id="tuning-controls">
-              {isCustomTuning ? (
-                <CustomTuning
-                  guitarType={guitarType}
-                  tuning={tuning}
-                  setTuning={setTuning}
-                />
-              ) : (
-                <TuningHelper
-                  guitarType={guitarType}
-                  tuning={tuning}
-                />
-              )}
-            </div>
+          <div className="space-y-4">
+            <Accordion type="multiple" collapsible>
+              <AccordionItem value="fretboard-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-fuchsia-800 to-fuchsia-700 text-white shadow hover:from-fuchsia-700 hover:to-fuchsia-600">
+                  FRETBOARD VISUALIZER
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <div id="fretboard-container">
+                    <Fretboard
+                      guitarType={guitarType}
+                      tuning={tuning}
+                      rootNote={rootNote}
+                      scaleType={scaleType}
+                      displayMode={displayMode}
+                      noteSpelling={noteSpelling}
+                      fretRange={fretRange}
+                      showOptions={showOptions}
+                      currentScale={currentScale}
+                      fretboardNotes={fretboardNotes}
+                      overlays={overlay}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="tuner-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-teal-800 to-teal-700 text-white shadow hover:from-teal-700 hover:to-teal-600">
+                  TUNER HELPER
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <div id="tuning-controls">
+                    {isCustomTuning ? (
+                      <CustomTuning
+                        guitarType={guitarType}
+                        tuning={tuning}
+                        setTuning={setTuning}
+                      />
+                    ) : (
+                      <TuningHelper
+                        guitarType={guitarType}
+                        tuning={tuning}
+                      />
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ChordShapes
-              rootNote={rootNote}
-              scaleType={scaleType}
-              guitarType={guitarType}
-              currentScale={currentScale}
-            />
+          <div className="space-y-4">
+            <Accordion type="multiple" collapsible>
+              <AccordionItem value="chordshapes-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-purple-800 to-purple-700 text-white shadow hover:from-purple-700 hover:to-purple-600">
+                  CHORD SHAPES
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <ChordShapes
+                    rootNote={rootNote}
+                    scaleType={scaleType}
+                    guitarType={guitarType}
+                    currentScale={currentScale}
+                  />
+                </AccordionContent>
+              </AccordionItem>
 
-            <ChordProgressionGenerator
-              rootNote={rootNote}
-              scaleType={scaleType}
-              guitarType={guitarType}
-              tuning={tuning}
-              onChordSelect={(chordNotes) => {
-                console.log('Selected chord notes:', chordNotes);
-                // TODO: Highlight chord notes on fretboard
-              }}
-            />
+              <AccordionItem value="progression-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-rose-800 to-rose-700 text-white shadow hover:from-rose-700 hover:to-rose-600">
+                  CHORD PROGRESSION
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <ChordProgressionGenerator
+                    rootNote={rootNote}
+                    scaleType={scaleType}
+                    guitarType={guitarType}
+                    tuning={tuning}
+                    onChordSelect={(chordNotes) => {
+                      console.log('Selected chord notes:', chordNotes);
+                    }}
+                  />
+                </AccordionContent>
+              </AccordionItem>
 
-            <AudioControls
-              rootNote={rootNote}
-              scaleType={scaleType}
-              currentScale={currentScale}
-            />
+              <AccordionItem value="arpeggio-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-amber-800 to-amber-700 text-white shadow hover:from-amber-700 hover:to-amber-600">
+                  ARPEGGIO CREATOR
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <ArpeggioGenerator onOverlay={(events)=>{ setOverlay(events); }} />
+                </AccordionContent>
+              </AccordionItem>
 
-            <ShareControls
-              rootNote={rootNote}
-              scaleType={scaleType}
-              guitarType={guitarType}
-              tuning={tuning}
-              showNotes={showOptions.rootNotes}
-              showIntervals={showOptions.scaleNotes}
-              showFretNumbers={showOptions.fretNumbers}
-              fretRange={fretRange}
-              displayMode={displayMode}
-              currentScale={currentScale}
-            />
+              <AccordionItem value="audio-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-sky-800 to-sky-700 text-white shadow hover:from-sky-700 hover:to-sky-600">
+                  AUDIO CONTROLS
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <AudioControls
+                    rootNote={rootNote}
+                    scaleType={scaleType}
+                    currentScale={currentScale}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="share-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-slate-700 to-slate-600 text-white shadow hover:from-slate-600 hover:to-slate-500">
+                  SHARE / EXPORT
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <ShareControls
+                    rootNote={rootNote}
+                    scaleType={scaleType}
+                    guitarType={guitarType}
+                    tuning={tuning}
+                    showNotes={showOptions.rootNotes}
+                    showIntervals={showOptions.scaleNotes}
+                    showFretNumbers={showOptions.fretNumbers}
+                    fretRange={fretRange}
+                    displayMode={displayMode}
+                    currentScale={currentScale}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         </div>
 
