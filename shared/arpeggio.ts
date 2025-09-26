@@ -126,15 +126,27 @@ function positionRange(position: ArpeggioPosition): { min: number; max: number }
   }
 }
 
-function mapToFretboard(pcSeq: number[], root: string, position: ArpeggioPosition): { midi: number; string: number; fret: number }[] {
-  // Aim for minimal movement: greedy selection minimizing |fret - prevFret|, prefer higher strings (treble) for melodic contour
+function buildStringTraversal(length: number): number[] {
+  // 6->1 then 1->6 repeating: indices 5..0..5
+  const up = [5,4,3,2,1,0];
+  const down = [1,2,3,4,5];
+  const cycle = up.concat(down);
+  const order: number[] = [];
+  for (let i=0;i<Math.ceil(length / cycle.length)+1;i++) order.push(...cycle);
+  return order.slice(0, length);
+}
+
+function mapToFretboard(pcSeq: number[], root: string, position: ArpeggioPosition, stringOrder?: number[]): { midi: number; string: number; fret: number }[] {
+  // Aim for minimal movement within a position, optionally traverse specific string order (e.g., sweep 6->1->6)
   const range = positionRange(position);
   let prevFret = (range.min + range.max) / 2;
   const mapped: { midi: number; string: number; fret: number }[] = [];
   let currentOctaveBias = 3; // favor lower-mid register
-  for (const pc of pcSeq) {
+  for (let i = 0; i < pcSeq.length; i++) {
+    const pc = pcSeq[i];
     let best: { string: number; fret: number; midi: number; cost: number } | null = null;
-    for (let s = 0; s < 6; s++) {
+    const sCandidates = stringOrder ? [stringOrder[i % stringOrder.length]] : [0,1,2,3,4,5];
+    for (const s of sCandidates) {
       const openMidi = OPEN_STRING_MIDI[s];
       for (let fret = range.min; fret <= range.max; fret++) {
         const midi = openMidi + fret;
@@ -146,7 +158,8 @@ function mapToFretboard(pcSeq: number[], root: string, position: ArpeggioPositio
     }
     if (!best) {
       // fallback expand search outside position slightly
-      for (let s = 0; s < 6 && !best; s++) {
+      const sFallback = sCandidates.length ? sCandidates : [0,1,2,3,4,5];
+      for (const s of sFallback) {
         const openMidi = OPEN_STRING_MIDI[s];
         for (let fret = Math.max(0, range.min-2); fret <= Math.min(18, range.max+2); fret++) {
           const midi = openMidi + fret;
@@ -191,7 +204,8 @@ export function renderAsciiTab(events: ArpeggioEvent[], secondsPerStep: number, 
 export function generateArpeggio(input: ArpeggioInput): ArpeggioResult {
   const key = normalizeNote(input.key);
   const pcSeq = buildArpeggioPitchClasses(key, input.chord, input.length, input.pattern);
-  const mapped = mapToFretboard(pcSeq, key, input.position);
+  const stringOrder = (input.pattern === 'sweep' || input.pattern === 'updown') ? buildStringTraversal(input.length) : undefined;
+  const mapped = mapToFretboard(pcSeq, key, input.position, stringOrder);
   const secondsPerBeat = 60 / input.tempo;
   const secondsPerStep = secondsPerBeat / input.subdivision;
   const events: ArpeggioEvent[] = mapped.map((m, i) => {
