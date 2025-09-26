@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { NOTES } from "@/lib/music-theory";
+import { generateArpeggio } from "@/lib/arpeggio";
 
 type ArpeggioPattern = 'ascending' | 'descending' | 'updown' | 'sweep';
 type ArpeggioPosition = 'open' | 'low' | 'mid' | 'high' | 'multi';
@@ -40,13 +41,18 @@ export default function ArpeggioGenerator({ onOverlay }: { onOverlay?: (events: 
   const generate = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/arpeggio/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, chord, pattern, position, length, tempo, subdivision })
-      });
-      if (!res.ok) throw new Error('Generation failed');
-      const data: ArpeggioResponse = await res.json();
+      let data: ArpeggioResponse | null = null;
+      try {
+        data = generateArpeggio({ key, chord, pattern, position, length, tempo, subdivision }) as unknown as ArpeggioResponse;
+      } catch (e) {
+        const res = await fetch('/api/arpeggio/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, chord, pattern, position, length, tempo, subdivision })
+        });
+        if (!res.ok) throw new Error('Generation failed');
+        data = await res.json();
+      }
       setAscii(data.ascii);
       setLastEvents(data.events);
       if (onOverlay) {
