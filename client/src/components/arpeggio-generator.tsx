@@ -35,6 +35,7 @@ export default function ArpeggioGenerator({ onOverlay }: { onOverlay?: (events: 
   const [subdivision, setSubdivision] = useState<number>(2);
   const [ascii, setAscii] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [lastEvents, setLastEvents] = useState<ArpeggioEvent[] | null>(null);
 
   const generate = async () => {
     try {
@@ -47,6 +48,7 @@ export default function ArpeggioGenerator({ onOverlay }: { onOverlay?: (events: 
       if (!res.ok) throw new Error('Generation failed');
       const data: ArpeggioResponse = await res.json();
       setAscii(data.ascii);
+      setLastEvents(data.events);
       if (onOverlay) {
         onOverlay(data.events.map(e => ({ string: e.string, fret: e.fret })));
       }
@@ -133,6 +135,15 @@ export default function ArpeggioGenerator({ onOverlay }: { onOverlay?: (events: 
         </div>
         <div className="flex gap-2">
           <Button onClick={generate} disabled={loading}>{loading ? 'Generating...' : 'Generate'}</Button>
+          <Button variant="outline" disabled={!lastEvents} onClick={async ()=>{
+            if (!lastEvents) return;
+            // play via audio engine by noteName (use existing engine on server-side mapping: note includes octave)
+            const { audioEngine } = await import("@/lib/audio");
+            for (const ev of lastEvents) {
+              await audioEngine.playNoteName(ev.note, Math.max(0.15, ev.duration));
+              await new Promise(r=>setTimeout(r, Math.max(50, ev.duration*1000)));
+            }
+          }}>Play</Button>
         </div>
         {ascii && (
           <div className="mt-4">

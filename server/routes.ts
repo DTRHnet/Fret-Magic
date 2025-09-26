@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { generateArpeggio } from "../shared/arpeggio";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
@@ -29,7 +30,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!Number.isFinite(tempoNum) || tempoNum < 30 || tempoNum > 300) return res.status(400).json({ error: 'invalid tempo' });
       if (!Number.isFinite(subNum) || subNum < 1 || subNum > 8) return res.status(400).json({ error: 'invalid subdivision' });
 
-      const { generateArpeggio } = await import('../shared/arpeggio.ts');
       const result = generateArpeggio({ key, chord, pattern, position, length: lengthNum, tempo: tempoNum, subdivision: subNum });
       return res.json(result);
     } catch (err) {
