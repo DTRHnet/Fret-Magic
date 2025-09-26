@@ -46,6 +46,7 @@ export default function Home() {
     currentScale,
     fretboardNotes
   } = useFretboard();
+  const [overlay, setOverlay] = useState<{ string: number; fret: number }[] | undefined>(undefined);
 
   // Determine if current tuning is custom
   const currentPreset = Object.entries(TUNING_PRESETS).find(([_, preset]) => 
@@ -298,6 +299,7 @@ export default function Home() {
                 showOptions={showOptions}
                 currentScale={currentScale}
                 fretboardNotes={fretboardNotes}
+                overlays={overlay}
               />
             </div>
             
@@ -464,7 +466,7 @@ export default function Home() {
                 currentScale={currentScale}
               />
 
-              <ArpeggioGenerator onOverlay={(events)=>{ /* reserved for future fretboard overlay */ }} />
+              <ArpeggioGenerator onOverlay={(events)=>{ setOverlay(events); }} />
 
               <ShareControls
                 rootNote={rootNote}

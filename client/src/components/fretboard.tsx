@@ -25,6 +25,7 @@ interface FretboardProps {
     pattern: string;
   };
   fretboardNotes: FretboardNote[][];
+  overlays?: { string: number; fret: number }[];
 }
 
 export default function Fretboard({
@@ -37,7 +38,8 @@ export default function Fretboard({
   fretRange,
   showOptions,
   currentScale,
-  fretboardNotes
+  fretboardNotes,
+  overlays = []
 }: FretboardProps) {
   const [chordTableType, setChordTableType] = useState<"triads" | "sevenths">("triads");
   const fretWidth = 70;
@@ -379,6 +381,23 @@ export default function Fretboard({
                 renderNote(note, stringIndex, fretIndex)
               )
             )}
+
+          {/* Arpeggio/Overlay Highlights */}
+          {overlays.map((ov, idx) => {
+            const stringIndex = Math.max(0, Math.min(guitarType - 1, guitarType - ov.string));
+            const fretIndex = ov.fret;
+            const x = fretIndex === 0
+              ? nutX - 12
+              : fretIndex === 1
+                ? nutX + fretWidth / 2
+                : startX + (fretIndex - 2) * fretWidth + fretWidth / 2;
+            const y = startY + (guitarType - 1 - stringIndex) * stringSpacing;
+            return (
+              <g key={`ov-${idx}`}>
+                <circle cx={x} cy={y} r={14} fill="none" stroke="#22c55e" strokeWidth={3} />
+              </g>
+            );
+          })}
           </svg>
         </div>
         
