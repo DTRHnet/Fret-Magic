@@ -309,39 +309,6 @@ export default function Home() {
               </AccordionItem>
             </Accordion>
           </div>
-            <div id="guitar-controls">
-              <GuitarControls
-                guitarType={guitarType}
-                setGuitarType={setGuitarType}
-                tuning={tuning}
-                setTuning={setTuning}
-                onCustomSelected={() => setForceCustomTuning(true)}
-                onPresetSelected={() => setForceCustomTuning(false)}
-              />
-            </div>
-            
-            <div id="scale-controls">
-              <ScaleControls
-                rootNote={rootNote}
-                setRootNote={setRootNote}
-                scaleType={scaleType}
-                setScaleType={setScaleType}
-              />
-            </div>
-            
-            <div id="display-controls">
-              <DisplayControls
-                displayMode={displayMode as "notes" | "intervals" | "degrees"}
-                setDisplayMode={setDisplayMode as (m: "notes" | "intervals" | "degrees") => void}
-                noteSpelling={noteSpelling}
-                setNoteSpelling={setNoteSpelling}
-                fretRange={fretRange}
-                setFretRange={setFretRange}
-                showOptions={showOptions}
-                setShowOptions={setShowOptions}
-              />
-            </div>
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div id="fretboard-container">
