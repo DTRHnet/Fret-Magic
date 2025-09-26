@@ -19,6 +19,7 @@ import ChordProgressionGenerator from "@/components/chord-progression-generator"
 import AudioControls from "@/components/audio-controls";
 import ShareControls from "@/components/share-controls";
 import ArpeggioGenerator from "@/components/arpeggio-generator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export default function Home() {
   const [forceCustomTuning, setForceCustomTuning] = useState(false);
@@ -251,7 +252,63 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Mobile/Tablet Layout */}
         <div className="lg:hidden space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <Accordion type="multiple" collapsible>
+              <AccordionItem value="guitar-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-slate-800 to-slate-700 text-white shadow hover:from-slate-700 hover:to-slate-600">
+                  GUITAR SETTINGS
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <div id="guitar-controls">
+                    <GuitarControls
+                      guitarType={guitarType}
+                      setGuitarType={setGuitarType}
+                      tuning={tuning}
+                      setTuning={setTuning}
+                      onCustomSelected={() => setForceCustomTuning(true)}
+                      onPresetSelected={() => setForceCustomTuning(false)}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="scale-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-indigo-800 to-indigo-700 text-white shadow hover:from-indigo-700 hover:to-indigo-600">
+                  KEY / SCALE / MODE
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <div id="scale-controls">
+                    <ScaleControls
+                      rootNote={rootNote}
+                      setRootNote={setRootNote}
+                      scaleType={scaleType}
+                      setScaleType={setScaleType}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="display-m" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-emerald-800 to-emerald-700 text-white shadow hover:from-emerald-700 hover:to-emerald-600">
+                  DISPLAY OPTIONS
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <div id="display-controls">
+                    <DisplayControls
+                      displayMode={displayMode as "notes" | "intervals" | "degrees"}
+                      setDisplayMode={setDisplayMode as (m: "notes" | "intervals" | "degrees") => void}
+                      noteSpelling={noteSpelling}
+                      setNoteSpelling={setNoteSpelling}
+                      fretRange={fretRange}
+                      setFretRange={setFretRange}
+                      showOptions={showOptions}
+                      setShowOptions={setShowOptions}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
             <div id="guitar-controls">
               <GuitarControls
                 guitarType={guitarType}
@@ -360,51 +417,74 @@ export default function Home() {
         </div>
 
         {/* Desktop Layout */}
-        <div className="hidden lg:grid lg:grid-cols-6 gap-6 overflow-x-auto">
+          <div className="hidden lg:grid lg:grid-cols-6 gap-6 overflow-x-auto">
           
           {/* Left Controls Column */}
           <div className="lg:col-span-1 space-y-6 min-w-[320px]" id="left-column">
-            <div 
-              id="guitar-controls"
-              className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'guitar-controls' ? 'dragging' : ''}`}
-              draggable={isDragMode}
-              onDragStart={(e) => handleDragStart(e, 'guitar-controls')}
-              onDragOver={handleDragOver}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, 'guitar-controls')}
-            >
-              <GuitarControls
-                guitarType={guitarType}
-                setGuitarType={setGuitarType}
-                tuning={tuning}
-                setTuning={setTuning}
-                onCustomSelected={() => setForceCustomTuning(true)}
-                onPresetSelected={() => setForceCustomTuning(false)}
-              />
-            </div>
-            
-            <div id="scale-controls">
-              <ScaleControls
-                rootNote={rootNote}
-                setRootNote={setRootNote}
-                scaleType={scaleType}
-                setScaleType={setScaleType}
-              />
-            </div>
-            
-            <div id="display-controls">
-              <DisplayControls
-                displayMode={displayMode as "notes" | "intervals" | "degrees"}
-                setDisplayMode={setDisplayMode as (m: "notes" | "intervals" | "degrees") => void}
-                noteSpelling={noteSpelling}
-                setNoteSpelling={setNoteSpelling}
-                fretRange={fretRange}
-                setFretRange={setFretRange}
-                showOptions={showOptions}
-                setShowOptions={setShowOptions}
-              />
-            </div>
+            <Accordion type="multiple" collapsible>
+              <AccordionItem value="guitar-d" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-slate-800 to-slate-700 text-white shadow hover:from-slate-700 hover:to-slate-600">
+                  GUITAR SETTINGS
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <div 
+                    id="guitar-controls"
+                    className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'guitar-controls' ? 'dragging' : ''}`}
+                    draggable={isDragMode}
+                    onDragStart={(e) => handleDragStart(e, 'guitar-controls')}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, 'guitar-controls')}
+                  >
+                    <GuitarControls
+                      guitarType={guitarType}
+                      setGuitarType={setGuitarType}
+                      tuning={tuning}
+                      setTuning={setTuning}
+                      onCustomSelected={() => setForceCustomTuning(true)}
+                      onPresetSelected={() => setForceCustomTuning(false)}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="scale-d" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-indigo-800 to-indigo-700 text-white shadow hover:from-indigo-700 hover:to-indigo-600">
+                  KEY / SCALE / MODE
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <div id="scale-controls">
+                    <ScaleControls
+                      rootNote={rootNote}
+                      setRootNote={setRootNote}
+                      scaleType={scaleType}
+                      setScaleType={setScaleType}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="display-d" className="border rounded-lg">
+                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-emerald-800 to-emerald-700 text-white shadow hover:from-emerald-700 hover:to-emerald-600">
+                  DISPLAY OPTIONS
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <div id="display-controls">
+                    <DisplayControls
+                      displayMode={displayMode as "notes" | "intervals" | "degrees"}
+                      setDisplayMode={setDisplayMode as (m: "notes" | "intervals" | "degrees") => void}
+                      noteSpelling={noteSpelling}
+                      setNoteSpelling={setNoteSpelling}
+                      fretRange={fretRange}
+                      setFretRange={setFretRange}
+                      showOptions={showOptions}
+                      setShowOptions={setShowOptions}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
             
             <div id="tuning-controls">
               {isCustomTuning ? (
