@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Bug Fixes
+
+#### Extended Range Guitar Chord Shapes (September 29, 2025)
+- **FIXED**: Chord shapes for 7 and 8 string guitars now correctly position standard shapes
+- Extended range guitars add LOWER strings (B for 7-string, F# and B for 8-string), not higher ones
+- Standard 6-string chord shapes now remain on the higher 6 strings (strings 2-7 for 7-string, 3-8 for 8-string)
+- Added proper extended voicings that utilize the lower strings for bass notes:
+  - Each chord now has both standard and extended versions
+  - Extended versions include optional low root notes on the B string (7-string) or F#/B strings (8-string)
+  - Proper fret positions calculated for low string root notes
+- Fixed fingering array adjustment logic to handle extended range properly
+- Chord diagrams now correctly show the right number of strings and positions
+
 ### 🎸 New Features
 
 #### Dynamic Blank Tab Sheet Generator (September 29, 2025)

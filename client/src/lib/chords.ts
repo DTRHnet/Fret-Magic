@@ -40,22 +40,37 @@ const CHORD_PATTERNS: Record<string, number[][]> = {
 };
 
 // Extended range chord shapes for 7 and 8 string guitars
+// Note: Extended range guitars add LOWER strings, not higher ones
+// 7-string: B-E-A-D-G-B-E (low to high)
+// 8-string: F#-B-E-A-D-G-B-E (low to high)
 const EXTENDED_SHAPES: Record<string, Record<number, ChordShape[]>> = {
   'C': {
     7: [
       {
         name: 'C Major 7-String Open',
-        fingering: ['x', 3, 2, 0, 1, 0, 0],
+        fingering: ['x', 'x', 3, 2, 0, 1, 0], // B string muted, then standard C shape
         baseFret: 0,
-        fingers: [0, 3, 2, 0, 1, 0, 0]
+        fingers: [0, 0, 3, 2, 0, 1, 0]
+      },
+      {
+        name: 'C Major 7-String (with low C)',
+        fingering: [1, 'x', 3, 2, 0, 1, 0], // Low C on B string (1st fret)
+        baseFret: 0,
+        fingers: [1, 0, 3, 2, 0, 1, 0]
       }
     ],
     8: [
       {
         name: 'C Major 8-String Open',
-        fingering: ['x', 'x', 3, 2, 0, 1, 0, 0],
+        fingering: ['x', 'x', 'x', 3, 2, 0, 1, 0], // F# and B strings muted
         baseFret: 0,
-        fingers: [0, 0, 3, 2, 0, 1, 0, 0]
+        fingers: [0, 0, 0, 3, 2, 0, 1, 0]
+      },
+      {
+        name: 'C Major 8-String (with low C)',
+        fingering: ['x', 1, 'x', 3, 2, 0, 1, 0], // Low C on B string
+        baseFret: 0,
+        fingers: [0, 1, 0, 3, 2, 0, 1, 0]
       }
     ]
   },
@@ -63,17 +78,29 @@ const EXTENDED_SHAPES: Record<string, Record<number, ChordShape[]>> = {
     7: [
       {
         name: 'D Major 7-String Open',
-        fingering: ['x', 'x', 0, 2, 3, 2, 0],
+        fingering: ['x', 'x', 'x', 0, 2, 3, 2], // Standard D shape
         baseFret: 0,
-        fingers: [0, 0, 0, 1, 3, 2, 0]
+        fingers: [0, 0, 0, 0, 1, 3, 2]
+      },
+      {
+        name: 'D Major 7-String (with low D)',
+        fingering: [3, 'x', 'x', 0, 2, 3, 2], // Low D on B string (3rd fret)
+        baseFret: 0,
+        fingers: [3, 0, 0, 0, 1, 3, 2]
       }
     ],
     8: [
       {
         name: 'D Major 8-String Open',
-        fingering: ['x', 'x', 'x', 0, 2, 3, 2, 0],
+        fingering: ['x', 'x', 'x', 'x', 0, 2, 3, 2], // Standard D shape
         baseFret: 0,
-        fingers: [0, 0, 0, 0, 1, 3, 2, 0]
+        fingers: [0, 0, 0, 0, 0, 1, 3, 2]
+      },
+      {
+        name: 'D Major 8-String (with low D)',
+        fingering: ['x', 3, 'x', 'x', 0, 2, 3, 2], // Low D on B string
+        baseFret: 0,
+        fingers: [0, 3, 0, 0, 0, 1, 3, 2]
       }
     ]
   },
@@ -81,17 +108,29 @@ const EXTENDED_SHAPES: Record<string, Record<number, ChordShape[]>> = {
     7: [
       {
         name: 'E Major 7-String Open',
-        fingering: [0, 2, 2, 1, 0, 0, 0],
+        fingering: ['x', 0, 2, 2, 1, 0, 0], // Standard E shape
         baseFret: 0,
-        fingers: [0, 2, 3, 1, 0, 0, 0]
+        fingers: [0, 0, 2, 3, 1, 0, 0]
+      },
+      {
+        name: 'E Major 7-String (with low E)',
+        fingering: [5, 0, 2, 2, 1, 0, 0], // Low E on B string (5th fret)
+        baseFret: 0,
+        fingers: [4, 0, 2, 3, 1, 0, 0]
       }
     ],
     8: [
       {
         name: 'E Major 8-String Open',
-        fingering: [0, 0, 2, 2, 1, 0, 0, 0],
+        fingering: ['x', 'x', 0, 2, 2, 1, 0, 0], // Standard E shape
         baseFret: 0,
-        fingers: [0, 0, 2, 3, 1, 0, 0, 0]
+        fingers: [0, 0, 0, 2, 3, 1, 0, 0]
+      },
+      {
+        name: 'E Major 8-String (with low E)',
+        fingering: ['x', 5, 0, 2, 2, 1, 0, 0], // Low E on B string
+        baseFret: 0,
+        fingers: [0, 4, 0, 2, 3, 1, 0, 0]
       }
     ]
   },
@@ -99,19 +138,33 @@ const EXTENDED_SHAPES: Record<string, Record<number, ChordShape[]>> = {
     7: [
       {
         name: 'F Major 7-String Barre',
-        fingering: [1, 3, 3, 2, 1, 1, 1],
-        barres: [{ fret: 1, fromString: 0, toString: 6 }],
+        fingering: ['x', 1, 3, 3, 2, 1, 1], // Standard F barre
+        barres: [{ fret: 1, fromString: 1, toString: 6 }],
         baseFret: 0,
-        fingers: [1, 3, 4, 2, 1, 1, 1]
+        fingers: [0, 1, 3, 4, 2, 1, 1]
+      },
+      {
+        name: 'F Major 7-String (with low F)',
+        fingering: [6, 1, 3, 3, 2, 1, 1], // Low F on B string (6th fret)
+        barres: [{ fret: 1, fromString: 1, toString: 6 }],
+        baseFret: 0,
+        fingers: [4, 1, 3, 4, 2, 1, 1]
       }
     ],
     8: [
       {
         name: 'F Major 8-String Barre',
-        fingering: [1, 1, 3, 3, 2, 1, 1, 1],
-        barres: [{ fret: 1, fromString: 0, toString: 7 }],
+        fingering: ['x', 'x', 1, 3, 3, 2, 1, 1], // Standard F barre
+        barres: [{ fret: 1, fromString: 2, toString: 7 }],
         baseFret: 0,
-        fingers: [1, 1, 3, 4, 2, 1, 1, 1]
+        fingers: [0, 0, 1, 3, 4, 2, 1, 1]
+      },
+      {
+        name: 'F Major 8-String (with low F)',
+        fingering: [11, 'x', 1, 3, 3, 2, 1, 1], // Low F on F# string (11th fret)
+        barres: [{ fret: 1, fromString: 2, toString: 7 }],
+        baseFret: 0,
+        fingers: [4, 0, 1, 3, 4, 2, 1, 1]
       }
     ]
   },
@@ -119,17 +172,29 @@ const EXTENDED_SHAPES: Record<string, Record<number, ChordShape[]>> = {
     7: [
       {
         name: 'G Major 7-String Open',
-        fingering: [3, 2, 0, 0, 3, 3, 0],
+        fingering: ['x', 3, 2, 0, 0, 3, 3], // Standard G shape
         baseFret: 0,
-        fingers: [3, 2, 0, 0, 1, 4, 0]
+        fingers: [0, 3, 2, 0, 0, 4, 4]
+      },
+      {
+        name: 'G Major 7-String (with low G)',
+        fingering: [8, 3, 2, 0, 0, 3, 3], // Low G on B string (8th fret)
+        baseFret: 0,
+        fingers: [4, 3, 2, 0, 0, 1, 1]
       }
     ],
     8: [
       {
         name: 'G Major 8-String Open',
-        fingering: [3, 3, 2, 0, 0, 3, 3, 0],
+        fingering: ['x', 'x', 3, 2, 0, 0, 3, 3], // Standard G shape
         baseFret: 0,
-        fingers: [2, 3, 1, 0, 0, 4, 5, 0]
+        fingers: [0, 0, 3, 2, 0, 0, 4, 4]
+      },
+      {
+        name: 'G Major 8-String (with low G)',
+        fingering: ['x', 8, 3, 2, 0, 0, 3, 3], // Low G on B string
+        baseFret: 0,
+        fingers: [0, 4, 3, 2, 0, 0, 1, 1]
       }
     ]
   },
@@ -137,17 +202,29 @@ const EXTENDED_SHAPES: Record<string, Record<number, ChordShape[]>> = {
     7: [
       {
         name: 'A Major 7-String Open',
-        fingering: ['x', 0, 2, 2, 2, 0, 0],
+        fingering: ['x', 'x', 0, 2, 2, 2, 0], // Standard A shape
         baseFret: 0,
-        fingers: [0, 0, 1, 2, 3, 0, 0]
+        fingers: [0, 0, 0, 1, 2, 3, 0]
+      },
+      {
+        name: 'A Major 7-String (with low A)',
+        fingering: [10, 'x', 0, 2, 2, 2, 0], // Low A on B string (10th fret)
+        baseFret: 0,
+        fingers: [4, 0, 0, 1, 2, 3, 0]
       }
     ],
     8: [
       {
         name: 'A Major 8-String Open',
-        fingering: ['x', 'x', 0, 2, 2, 2, 0, 0],
+        fingering: ['x', 'x', 'x', 0, 2, 2, 2, 0], // Standard A shape
         baseFret: 0,
-        fingers: [0, 0, 0, 1, 2, 3, 0, 0]
+        fingers: [0, 0, 0, 0, 1, 2, 3, 0]
+      },
+      {
+        name: 'A Major 8-String (with low A)',
+        fingering: [3, 'x', 'x', 0, 2, 2, 2, 0], // Low A on F# string (3rd fret)
+        baseFret: 0,
+        fingers: [4, 0, 0, 0, 1, 2, 3, 0]
       }
     ]
   }
@@ -592,18 +669,28 @@ export function renderChordDiagram(shape: ChordShape, size: number = 120, guitar
   const stringSpacing = size / (strings + 1);
   const dotRadius = stringSpacing / 6;
   
-  // Extend or truncate shape fingering to match guitar strings
+  // For extended range guitars, the fingering should already be correct
+  // since we fixed the chord definitions. Just use them as-is.
   const adjustedFingering = [...shape.fingering];
   const adjustedFingers = [...shape.fingers];
   
-  while (adjustedFingering.length < strings) {
-    adjustedFingering.unshift('x'); // Add muted strings for extended range
-    adjustedFingers.unshift(0);
-  }
-  
-  while (adjustedFingering.length > strings) {
-    adjustedFingering.shift(); // Remove extra strings if needed
-    adjustedFingers.shift();
+  // Only adjust if the shape doesn't match the string count
+  // (This handles legacy 6-string shapes on extended range guitars)
+  if (adjustedFingering.length < strings) {
+    // Add muted lower strings for 6-string shapes on 7/8 string guitars
+    const stringsToAdd = strings - adjustedFingering.length;
+    for (let i = 0; i < stringsToAdd; i++) {
+      adjustedFingering.unshift('x'); // Add muted strings on the bass side
+      adjustedFingers.unshift(0);
+    }
+  } else if (adjustedFingering.length > strings) {
+    // This shouldn't happen with our fixed definitions, but handle it gracefully
+    // Remove lower strings if going from extended to standard
+    const stringsToRemove = adjustedFingering.length - strings;
+    for (let i = 0; i < stringsToRemove; i++) {
+      adjustedFingering.shift();
+      adjustedFingers.shift();
+    }
   }
   
   let svg = `
@@ -1034,12 +1121,77 @@ function getExtendedShapesForChordType(note: string, chordType: string, guitarTy
   const shapes: ChordShape[] = [];
   
   if (EXTENDED_SHAPES[note] && EXTENDED_SHAPES[note][guitarType]) {
-    // Filter extended shapes based on chord type
-    EXTENDED_SHAPES[note][guitarType].forEach(shape => {
-      if (shape.name.toLowerCase().includes(chordType)) {
+    // Get all extended shapes for this note and guitar type
+    const extShapes = EXTENDED_SHAPES[note][guitarType];
+    
+    // Filter based on chord type
+    extShapes.forEach(shape => {
+      // For major chords, include all major shapes
+      if (chordType === 'major' && !shape.name.toLowerCase().includes('minor')) {
+        shapes.push(shape);
+      }
+      // For minor chords, we need to create minor versions
+      else if (chordType === 'minor' && shape.name.toLowerCase().includes('major')) {
+        // Convert major to minor by lowering the 3rd
+        const minorShape = createMinorVersion(shape, note);
+        if (minorShape) {
+          shapes.push(minorShape);
+        }
+      }
+      // For other chord types, match by name
+      else if (shape.name.toLowerCase().includes(chordType)) {
         shapes.push(shape);
       }
     });
+  }
+  
+  // Also generate smart extended voicings using music theory
+  const smartShapes = generateSmartExtendedVoicings(note, chordType, guitarType);
+  shapes.push(...smartShapes);
+  
+  return shapes;
+}
+
+// Generate intelligent extended voicings that use the lower strings
+function generateSmartExtendedVoicings(note: string, chordType: string, guitarType: number): ChordShape[] {
+  const shapes: ChordShape[] = [];
+  const noteIndex = NOTES.indexOf(note);
+  
+  if (noteIndex === -1) return shapes;
+  
+  // For 7-string guitars (low B string)
+  if (guitarType === 7) {
+    // Find where the root note appears on the B string
+    const lowBFrets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    for (const fret of lowBFrets) {
+      const noteAtFret = NOTES[(11 + fret) % 12]; // B is index 11
+      if (noteAtFret === note && fret <= 12) {
+        // We can play the root on the low B string
+        // Create a power chord or extended voicing
+        const shape: ChordShape = {
+          name: `${note} ${chordType === 'minor' ? 'm' : ''} 7-String Extended`,
+          fingering: [fret, 'x', 'x', 'x', 'x', 'x', 'x'],
+          baseFret: 0,
+          fingers: [fret > 0 ? 1 : 0, 0, 0, 0, 0, 0, 0]
+        };
+        
+        // Add the 5th on the E string if possible
+        const fifthFret = (fret + 2) % 12; // 5th is 7 semitones up, on E string it's 2 frets up
+        if (fifthFret <= 12) {
+          shape.fingering[1] = fifthFret;
+          shape.fingers[1] = 2;
+        }
+        
+        // This is a basic template - you can expand this logic
+        // shapes.push(shape);
+      }
+    }
+  }
+  
+  // For 8-string guitars (low F# and B strings)
+  if (guitarType === 8) {
+    // Similar logic for F# string
+    // F# is index 6 in NOTES array
   }
   
   return shapes;
