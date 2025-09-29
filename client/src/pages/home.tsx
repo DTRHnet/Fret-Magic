@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type React from "react";
 import { Guitar, Download, FileImage, FileText, Move3D } from "lucide-react";
 import { useFretboard } from "@/hooks/use-fretboard";
 import GuitarControls from "@/components/guitar-controls";
@@ -134,6 +135,11 @@ export default function Home() {
     target.classList.remove('drag-over');
   };
 
+  const handleDragEnd = () => {
+    setDraggedElement(null);
+    setDraggedComponent(null);
+  };
+
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
     const target = e.currentTarget as HTMLElement;
@@ -142,7 +148,8 @@ export default function Home() {
     const sourceId = e.dataTransfer.getData('text/plain');
     if (sourceId !== targetId && draggedComponent) {
       // Check if it's a valid drop (e.g., fretboard can't go to left column)
-      if (sourceId === 'fretboard-container' && targetId.includes('left-column')) {
+      const isTargetInLeftColumn = !!(target.closest('#left-column'));
+      if (sourceId === 'fretboard-container' && isTargetInLeftColumn) {
         return; // Invalid drop - fretboard too large for left column
       }
       
@@ -259,7 +266,7 @@ export default function Home() {
                   GUITAR SETTINGS
                 </AccordionTrigger>
                 <AccordionContent className="pt-3">
-                  <div id="guitar-controls">
+                  <div id="guitar-controls-m">
                     <GuitarControls
                       guitarType={guitarType}
                       setGuitarType={setGuitarType}
@@ -277,7 +284,7 @@ export default function Home() {
                   KEY / SCALE / MODE
                 </AccordionTrigger>
                 <AccordionContent className="pt-3">
-                  <div id="scale-controls">
+                  <div id="scale-controls-m">
                     <ScaleControls
                       rootNote={rootNote}
                       setRootNote={setRootNote}
@@ -293,7 +300,7 @@ export default function Home() {
                   DISPLAY OPTIONS
                 </AccordionTrigger>
                 <AccordionContent className="pt-3">
-                  <div id="display-controls">
+                  <div id="display-controls-m">
                     <DisplayControls
                       displayMode={displayMode as "notes" | "intervals" | "degrees"}
                       setDisplayMode={setDisplayMode as (m: "notes" | "intervals" | "degrees") => void}
@@ -317,7 +324,7 @@ export default function Home() {
                   FRETBOARD VISUALIZER
                 </AccordionTrigger>
                 <AccordionContent className="pt-3">
-                  <div id="fretboard-container">
+                  <div id="fretboard-container-m">
                     <Fretboard
                       guitarType={guitarType}
                       tuning={tuning}
@@ -340,7 +347,7 @@ export default function Home() {
                   TUNER HELPER
                 </AccordionTrigger>
                 <AccordionContent className="pt-3">
-                  <div id="tuning-controls">
+                  <div id="tuning-controls-m">
                     {isCustomTuning ? (
                       <CustomTuning
                         guitarType={guitarType}
@@ -452,10 +459,11 @@ export default function Home() {
                     id="guitar-controls"
                     className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'guitar-controls' ? 'dragging' : ''}`}
                     draggable={isDragMode}
-                    onDragStart={(e) => handleDragStart(e, 'guitar-controls')}
+                    onDragStart={(e: React.DragEvent) => handleDragStart(e, 'guitar-controls')}
                     onDragOver={handleDragOver}
                     onDragEnter={handleDragEnter}
                     onDragLeave={handleDragLeave}
+                    onDragEnd={handleDragEnd}
                     onDrop={(e) => handleDrop(e, 'guitar-controls')}
                   >
                     <GuitarControls
@@ -475,7 +483,17 @@ export default function Home() {
                   KEY / SCALE / MODE
                 </AccordionTrigger>
                 <AccordionContent className="pt-3">
-                  <div id="scale-controls">
+                  <div 
+                    id="scale-controls"
+                    className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'scale-controls' ? 'dragging' : ''}`}
+                    draggable={isDragMode}
+                    onDragStart={(e: React.DragEvent) => handleDragStart(e, 'scale-controls')}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragEnd={handleDragEnd}
+                    onDrop={(e) => handleDrop(e, 'scale-controls')}
+                  >
                     <ScaleControls
                       rootNote={rootNote}
                       setRootNote={setRootNote}
@@ -491,7 +509,17 @@ export default function Home() {
                   DISPLAY OPTIONS
                 </AccordionTrigger>
                 <AccordionContent className="pt-3">
-                  <div id="display-controls">
+                  <div 
+                    id="display-controls"
+                    className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'display-controls' ? 'dragging' : ''}`}
+                    draggable={isDragMode}
+                    onDragStart={(e: React.DragEvent) => handleDragStart(e, 'display-controls')}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragEnd={handleDragEnd}
+                    onDrop={(e) => handleDrop(e, 'display-controls')}
+                  >
                     <DisplayControls
                       displayMode={displayMode as "notes" | "intervals" | "degrees"}
                       setDisplayMode={setDisplayMode as (m: "notes" | "intervals" | "degrees") => void}
@@ -507,7 +535,17 @@ export default function Home() {
               </AccordionItem>
             </Accordion>
             
-            <div id="tuning-controls">
+            <div 
+              id="tuning-controls"
+              className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'tuning-controls' ? 'dragging' : ''}`}
+              draggable={isDragMode}
+              onDragStart={(e: React.DragEvent) => handleDragStart(e, 'tuning-controls')}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragEnd={handleDragEnd}
+              onDrop={(e) => handleDrop(e, 'tuning-controls')}
+            >
               {isCustomTuning ? (
                 <CustomTuning
                   guitarType={guitarType}
@@ -526,7 +564,17 @@ export default function Home() {
           {/* Right Content Area */}
           <div className="lg:col-span-5 space-y-6 min-w-[900px]">
             {/* Fretboard */}
-            <div id="fretboard-container">
+            <div 
+              id="fretboard-container"
+              className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'fretboard-container' ? 'dragging' : ''}`}
+              draggable={isDragMode}
+              onDragStart={(e: React.DragEvent) => handleDragStart(e, 'fretboard-container')}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragEnd={handleDragEnd}
+              onDrop={(e) => handleDrop(e, 'fretboard-container')}
+            >
               <Fretboard
                 guitarType={guitarType}
                 tuning={tuning}
@@ -543,45 +591,105 @@ export default function Home() {
 
             {/* Advanced Tools Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <ChordShapes
-                rootNote={rootNote}
-                scaleType={scaleType}
-                guitarType={guitarType}
-                currentScale={currentScale}
-              />
+              <div 
+                id="chord-shapes"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'chord-shapes' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e: React.DragEvent) => handleDragStart(e, 'chord-shapes')}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragEnd={handleDragEnd}
+                onDrop={(e) => handleDrop(e, 'chord-shapes')}
+              >
+                <ChordShapes
+                  rootNote={rootNote}
+                  scaleType={scaleType}
+                  guitarType={guitarType}
+                  currentScale={currentScale}
+                />
+              </div>
 
-              <ChordProgressionGenerator
-                rootNote={rootNote}
-                scaleType={scaleType}
-                guitarType={guitarType}
-                tuning={tuning}
-                onChordSelect={(chordNotes) => {
-                  console.log('Selected chord notes:', chordNotes);
-                  // TODO: Highlight chord notes on fretboard
-                }}
-              />
+              <div 
+                id="chord-progression"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'chord-progression' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e: React.DragEvent) => handleDragStart(e, 'chord-progression')}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragEnd={handleDragEnd}
+                onDrop={(e) => handleDrop(e, 'chord-progression')}
+              >
+                <ChordProgressionGenerator
+                  rootNote={rootNote}
+                  scaleType={scaleType}
+                  guitarType={guitarType}
+                  tuning={tuning}
+                  onChordSelect={(chordNotes) => {
+                    console.log('Selected chord notes:', chordNotes);
+                    // TODO: Highlight chord notes on fretboard
+                  }}
+                />
+              </div>
 
-              <AudioControls
-                rootNote={rootNote}
-                scaleType={scaleType}
-                currentScale={currentScale}
-              />
+              <div 
+                id="audio-controls"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'audio-controls' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e: React.DragEvent) => handleDragStart(e, 'audio-controls')}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragEnd={handleDragEnd}
+                onDrop={(e) => handleDrop(e, 'audio-controls')}
+              >
+                <AudioControls
+                  rootNote={rootNote}
+                  scaleType={scaleType}
+                  currentScale={currentScale}
+                />
+              </div>
 
-              <ArpeggioGenerator onOverlay={(events)=>{ setOverlay(events); }} />
+              <div 
+                id="arpeggio-generator"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'arpeggio-generator' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e: React.DragEvent) => handleDragStart(e, 'arpeggio-generator')}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragEnd={handleDragEnd}
+                onDrop={(e) => handleDrop(e, 'arpeggio-generator')}
+              >
+                <ArpeggioGenerator onOverlay={(events)=>{ setOverlay(events); }} />
+              </div>
 
-              <ShareControls
-                rootNote={rootNote}
-                scaleType={scaleType}
-                guitarType={guitarType}
-                tuning={tuning}
-                showNotes={showOptions.rootNotes}
-                showIntervals={showOptions.scaleNotes}
-                showFretNumbers={showOptions.fretNumbers}
-                fretRange={fretRange}
-                displayMode={displayMode}
-                noteSpelling={noteSpelling}
-                currentScale={currentScale}
-              />
+              <div 
+                id="share-controls"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'share-controls' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e: React.DragEvent) => handleDragStart(e, 'share-controls')}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragEnd={handleDragEnd}
+                onDrop={(e) => handleDrop(e, 'share-controls')}
+              >
+                <ShareControls
+                  rootNote={rootNote}
+                  scaleType={scaleType}
+                  guitarType={guitarType}
+                  tuning={tuning}
+                  showNotes={showOptions.rootNotes}
+                  showIntervals={showOptions.scaleNotes}
+                  showFretNumbers={showOptions.fretNumbers}
+                  fretRange={fretRange}
+                  displayMode={displayMode}
+                  noteSpelling={noteSpelling}
+                  currentScale={currentScale}
+                />
+              </div>
             </div>
           </div>
           
