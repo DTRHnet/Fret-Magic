@@ -114,60 +114,88 @@ export default function Home() {
 
   // Drag and drop functionality
   const handleDragStart = (e: React.DragEvent, componentId: string) => {
+    e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', componentId);
     setDraggedElement(componentId);
-    setDraggedComponent(e.currentTarget as HTMLElement);
+    const element = e.currentTarget as HTMLElement;
+    setDraggedComponent(element);
+    
+    // Add dragging class for visual feedback
+    setTimeout(() => {
+      element.classList.add('dragging');
+    }, 0);
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    const element = e.currentTarget as HTMLElement;
+    element.classList.remove('dragging');
+    
+    // Clean up any drag-over classes
+    document.querySelectorAll('.drag-over').forEach(el => {
+      el.classList.remove('drag-over');
+    });
+    
+    setDraggedElement(null);
+    setDraggedComponent(null);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
   };
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     const target = e.currentTarget as HTMLElement;
-    target.classList.add('drag-over');
+    if (target && target !== draggedComponent) {
+      target.classList.add('drag-over');
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     const target = e.currentTarget as HTMLElement;
-    target.classList.remove('drag-over');
+    // Only remove if we're actually leaving the element
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (!target.contains(relatedTarget)) {
+      target.classList.remove('drag-over');
+    }
   };
 
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
+    e.stopPropagation();
+    
     const target = e.currentTarget as HTMLElement;
     target.classList.remove('drag-over');
     
-    const sourceId = e.dataTransfer.getData('text/plain');
-    if (sourceId !== targetId && draggedComponent) {
-      // Check if it's a valid drop (e.g., fretboard can't go to left column)
-      if (sourceId === 'fretboard-container' && targetId.includes('left-column')) {
-        return; // Invalid drop - fretboard too large for left column
-      }
-      
-      // Swap components
+    const sourceId = e.dataTransfer.getData('text/plain') || draggedElement;
+    
+    if (sourceId && sourceId !== targetId) {
+      // Get the actual elements
       const sourceElement = document.getElementById(sourceId);
       const targetElement = document.getElementById(targetId);
       
-      if (sourceElement && targetElement) {
-        const sourceParent = sourceElement.parentNode;
-        const targetParent = targetElement.parentNode;
-        const sourceNextSibling = sourceElement.nextSibling;
-        const targetNextSibling = targetElement.nextSibling;
+      if (sourceElement && targetElement && sourceElement !== targetElement) {
+        // Get parent containers
+        const sourceParent = sourceElement.parentElement;
+        const targetParent = targetElement.parentElement;
         
         if (sourceParent && targetParent) {
-          if (sourceNextSibling) {
-            sourceParent.insertBefore(targetElement, sourceNextSibling);
-          } else {
-            sourceParent.appendChild(targetElement);
-          }
+          // Create placeholders to maintain position
+          const sourcePlaceholder = document.createElement('div');
+          const targetPlaceholder = document.createElement('div');
           
-          if (targetNextSibling) {
-            targetParent.insertBefore(sourceElement, targetNextSibling);
-          } else {
-            targetParent.appendChild(sourceElement);
-          }
+          // Insert placeholders
+          sourceParent.insertBefore(sourcePlaceholder, sourceElement);
+          targetParent.insertBefore(targetPlaceholder, targetElement);
+          
+          // Swap elements
+          sourceParent.insertBefore(targetElement, sourcePlaceholder);
+          targetParent.insertBefore(sourceElement, targetPlaceholder);
+          
+          // Remove placeholders
+          sourcePlaceholder.remove();
+          targetPlaceholder.remove();
         }
       }
     }
@@ -443,21 +471,25 @@ export default function Home() {
           {/* Left Controls Column */}
           <div className="lg:col-span-1 space-y-6 min-w-[320px]" id="left-column">
             <Accordion type="multiple" collapsible>
-              <AccordionItem value="guitar-d" className="border rounded-lg">
-                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-slate-800 to-slate-700 text-white shadow hover:from-slate-700 hover:to-slate-600">
-                  GUITAR SETTINGS
-                </AccordionTrigger>
-                <AccordionContent className="pt-3">
-                  <div 
-                    id="guitar-controls"
-                    className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'guitar-controls' ? 'dragging' : ''}`}
-                    draggable={isDragMode}
-                    onDragStart={(e) => handleDragStart(e, 'guitar-controls')}
-                    onDragOver={handleDragOver}
-                    onDragEnter={handleDragEnter}
-                    onDragLeave={handleDragLeave}
-                    onDrop={(e) => handleDrop(e, 'guitar-controls')}
-                  >
+              <AccordionItem 
+                value="guitar-d" 
+                className="border rounded-lg"
+                id="guitar-controls-accordion"
+              >
+                <div
+                  className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'guitar-controls-accordion' ? 'dragging' : ''}`}
+                  draggable={isDragMode}
+                  onDragStart={(e) => handleDragStart(e, 'guitar-controls-accordion')}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, 'guitar-controls-accordion')}
+                >
+                  <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-slate-800 to-slate-700 text-white shadow hover:from-slate-700 hover:to-slate-600">
+                    GUITAR SETTINGS
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-3">
                     <GuitarControls
                       guitarType={guitarType}
                       setGuitarType={setGuitarType}
@@ -466,32 +498,58 @@ export default function Home() {
                       onCustomSelected={() => setForceCustomTuning(true)}
                       onPresetSelected={() => setForceCustomTuning(false)}
                     />
-                  </div>
-                </AccordionContent>
+                  </AccordionContent>
+                </div>
               </AccordionItem>
 
-              <AccordionItem value="scale-d" className="border rounded-lg">
-                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-indigo-800 to-indigo-700 text-white shadow hover:from-indigo-700 hover:to-indigo-600">
-                  KEY / SCALE / MODE
-                </AccordionTrigger>
-                <AccordionContent className="pt-3">
-                  <div id="scale-controls">
+              <AccordionItem 
+                value="scale-d" 
+                className="border rounded-lg"
+                id="scale-controls-accordion"
+              >
+                <div
+                  className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'scale-controls-accordion' ? 'dragging' : ''}`}
+                  draggable={isDragMode}
+                  onDragStart={(e) => handleDragStart(e, 'scale-controls-accordion')}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, 'scale-controls-accordion')}
+                >
+                  <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-indigo-800 to-indigo-700 text-white shadow hover:from-indigo-700 hover:to-indigo-600">
+                    KEY / SCALE / MODE
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-3">
                     <ScaleControls
                       rootNote={rootNote}
                       setRootNote={setRootNote}
                       scaleType={scaleType}
                       setScaleType={setScaleType}
                     />
-                  </div>
-                </AccordionContent>
+                  </AccordionContent>
+                </div>
               </AccordionItem>
 
-              <AccordionItem value="display-d" className="border rounded-lg">
-                <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-emerald-800 to-emerald-700 text-white shadow hover:from-emerald-700 hover:to-emerald-600">
-                  DISPLAY OPTIONS
-                </AccordionTrigger>
-                <AccordionContent className="pt-3">
-                  <div id="display-controls">
+              <AccordionItem 
+                value="display-d" 
+                className="border rounded-lg"
+                id="display-controls-accordion"
+              >
+                <div
+                  className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'display-controls-accordion' ? 'dragging' : ''}`}
+                  draggable={isDragMode}
+                  onDragStart={(e) => handleDragStart(e, 'display-controls-accordion')}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, 'display-controls-accordion')}
+                >
+                  <AccordionTrigger className="rounded-lg px-4 py-3 bg-gradient-to-r from-emerald-800 to-emerald-700 text-white shadow hover:from-emerald-700 hover:to-emerald-600">
+                    DISPLAY OPTIONS
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-3">
                     <DisplayControls
                       displayMode={displayMode as "notes" | "intervals" | "degrees"}
                       setDisplayMode={setDisplayMode as (m: "notes" | "intervals" | "degrees") => void}
@@ -502,12 +560,22 @@ export default function Home() {
                       showOptions={showOptions}
                       setShowOptions={setShowOptions}
                     />
-                  </div>
-                </AccordionContent>
+                  </AccordionContent>
+                </div>
               </AccordionItem>
             </Accordion>
             
-            <div id="tuning-controls">
+            <div 
+              id="tuning-controls"
+              className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'tuning-controls' ? 'dragging' : ''}`}
+              draggable={isDragMode}
+              onDragStart={(e) => handleDragStart(e, 'tuning-controls')}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, 'tuning-controls')}
+            >
               {isCustomTuning ? (
                 <CustomTuning
                   guitarType={guitarType}
@@ -526,7 +594,17 @@ export default function Home() {
           {/* Right Content Area */}
           <div className="lg:col-span-5 space-y-6 min-w-[900px]">
             {/* Fretboard */}
-            <div id="fretboard-container">
+            <div 
+              id="fretboard-container"
+              className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'fretboard-container' ? 'dragging' : ''}`}
+              draggable={isDragMode}
+              onDragStart={(e) => handleDragStart(e, 'fretboard-container')}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, 'fretboard-container')}
+            >
               <Fretboard
                 guitarType={guitarType}
                 tuning={tuning}
@@ -543,33 +621,92 @@ export default function Home() {
 
             {/* Advanced Tools Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <ChordShapes
-                rootNote={rootNote}
-                scaleType={scaleType}
-                guitarType={guitarType}
-                currentScale={currentScale}
-              />
+              <div
+                id="chord-shapes"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'chord-shapes' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e) => handleDragStart(e, 'chord-shapes')}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, 'chord-shapes')}
+              >
+                <ChordShapes
+                  rootNote={rootNote}
+                  scaleType={scaleType}
+                  guitarType={guitarType}
+                  currentScale={currentScale}
+                />
+              </div>
 
-              <ChordProgressionGenerator
-                rootNote={rootNote}
-                scaleType={scaleType}
-                guitarType={guitarType}
-                tuning={tuning}
-                onChordSelect={(chordNotes) => {
-                  console.log('Selected chord notes:', chordNotes);
-                  // TODO: Highlight chord notes on fretboard
-                }}
-              />
+              <div
+                id="chord-progression"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'chord-progression' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e) => handleDragStart(e, 'chord-progression')}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, 'chord-progression')}
+              >
+                <ChordProgressionGenerator
+                  rootNote={rootNote}
+                  scaleType={scaleType}
+                  guitarType={guitarType}
+                  tuning={tuning}
+                  onChordSelect={(chordNotes) => {
+                    console.log('Selected chord notes:', chordNotes);
+                    // TODO: Highlight chord notes on fretboard
+                  }}
+                />
+              </div>
 
-              <AudioControls
-                rootNote={rootNote}
-                scaleType={scaleType}
-                currentScale={currentScale}
-              />
+              <div
+                id="audio-controls"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'audio-controls' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e) => handleDragStart(e, 'audio-controls')}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, 'audio-controls')}
+              >
+                <AudioControls
+                  rootNote={rootNote}
+                  scaleType={scaleType}
+                  currentScale={currentScale}
+                />
+              </div>
 
-              <ArpeggioGenerator onOverlay={(events)=>{ setOverlay(events); }} />
+              <div
+                id="arpeggio-generator"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'arpeggio-generator' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e) => handleDragStart(e, 'arpeggio-generator')}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, 'arpeggio-generator')}
+              >
+                <ArpeggioGenerator onOverlay={(events)=>{ setOverlay(events); }} />
+              </div>
 
-              <ShareControls
+              <div
+                id="share-controls"
+                className={`draggable-component ${isDragMode ? 'drag-mode' : ''} ${draggedElement === 'share-controls' ? 'dragging' : ''}`}
+                draggable={isDragMode}
+                onDragStart={(e) => handleDragStart(e, 'share-controls')}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, 'share-controls')}
+              >
+                <ShareControls
                 rootNote={rootNote}
                 scaleType={scaleType}
                 guitarType={guitarType}
@@ -581,7 +718,8 @@ export default function Home() {
                 displayMode={displayMode}
                 noteSpelling={noteSpelling}
                 currentScale={currentScale}
-              />
+                />
+              </div>
             </div>
           </div>
           
