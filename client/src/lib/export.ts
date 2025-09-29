@@ -389,7 +389,12 @@ export async function createShareableImage(
   }
 }
 
-export function downloadBlankTabSheet(): void {
+export function downloadBlankTabSheet(
+  guitarType: number = 6,
+  tuning: string[] = ['E', 'A', 'D', 'G', 'B', 'E'],
+  scaleName?: string,
+  rootNote?: string
+): void {
   // Create a new PDF document
   const pdf = new jsPDF({
     orientation: 'portrait',
@@ -402,13 +407,20 @@ export function downloadBlankTabSheet(): void {
   const margin = 10;
   const usableWidth = pageWidth - (2 * margin);
   
+  // Reverse tuning for display (highest pitch first)
+  const displayTuning = [...tuning].reverse();
+  
   // Header with title
   pdf.setFillColor(245, 245, 245);
   pdf.rect(0, 0, pageWidth, 25, 'F');
   
   pdf.setFontSize(18);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Guitar Tablature & Chord Sheet', pageWidth / 2, 15, { align: 'center' });
+  const guitarTypeText = guitarType === 7 ? '7-String' : guitarType === 8 ? '8-String' : '';
+  const titleText = guitarTypeText ? 
+    `${guitarTypeText} Guitar Tablature & Chord Sheet` : 
+    'Guitar Tablature & Chord Sheet';
+  pdf.text(titleText, pageWidth / 2, 15, { align: 'center' });
   
   // Song info section with better layout
   pdf.setFontSize(10);
@@ -426,15 +438,32 @@ export function downloadBlankTabSheet(): void {
   pdf.rect(margin + 112, yPos - 4, 80, 6);
   
   yPos += 10;
-  // Key, Tempo, Time, Capo
+  // Key, Tempo, Time, Capo, Tuning
   pdf.text('Key:', margin, yPos);
-  pdf.rect(margin + 10, yPos - 4, 25, 6);
-  pdf.text('Tempo:', margin + 45, yPos);
-  pdf.rect(margin + 60, yPos - 4, 25, 6);
-  pdf.text('Time:', margin + 95, yPos);
-  pdf.rect(margin + 107, yPos - 4, 20, 6);
-  pdf.text('Capo:', margin + 137, yPos);
-  pdf.rect(margin + 149, yPos - 4, 20, 6);
+  pdf.rect(margin + 10, yPos - 4, 20, 6);
+  if (rootNote && scaleName) {
+    pdf.setFontSize(8);
+    pdf.setTextColor(100);
+    pdf.text(`${rootNote} ${scaleName}`, margin + 12, yPos);
+    pdf.setTextColor(0);
+    pdf.setFontSize(10);
+  }
+  
+  pdf.text('Tempo:', margin + 35, yPos);
+  pdf.rect(margin + 50, yPos - 4, 20, 6);
+  pdf.text('Time:', margin + 75, yPos);
+  pdf.rect(margin + 87, yPos - 4, 18, 6);
+  pdf.text('Capo:', margin + 110, yPos);
+  pdf.rect(margin + 122, yPos - 4, 15, 6);
+  
+  // Add tuning info
+  pdf.text('Tuning:', margin + 142, yPos);
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'italic');
+  const tuningStr = displayTuning.join('-');
+  pdf.text(tuningStr, margin + 160, yPos);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
   
   // Chord diagram section with improved layout
   yPos += 15;
@@ -445,12 +474,13 @@ export function downloadBlankTabSheet(): void {
   pdf.setFontSize(10);
   yPos += 10;
   
-  // Draw 8 chord diagram boxes (2 rows of 4)
-  const chordBoxSize = 28;
-  const chordBoxSpacing = 48;
-  const chordsPerRow = 4;
+  // Draw chord diagram boxes (adjusted for string count)
+  const chordBoxSize = guitarType === 8 ? 32 : guitarType === 7 ? 30 : 28;
+  const chordBoxSpacing = guitarType === 8 ? 52 : guitarType === 7 ? 50 : 48;
+  const chordsPerRow = guitarType === 8 ? 3 : 4; // Fewer boxes per row for extended range
+  const numRows = guitarType === 8 ? 2 : 2;
   
-  for (let row = 0; row < 2; row++) {
+  for (let row = 0; row < numRows; row++) {
     for (let col = 0; col < chordsPerRow; col++) {
       const xPos = margin + 10 + (col * chordBoxSpacing);
       const boxYPos = yPos + (row * (chordBoxSize + 20));
@@ -467,10 +497,11 @@ export function downloadBlankTabSheet(): void {
       pdf.setLineWidth(1.5);
       pdf.line(xPos, boxYPos, xPos + chordBoxSize, boxYPos);
       
-      // Draw vertical lines (strings) 
+      // Draw vertical lines (strings) - adjusted for guitar type
       pdf.setLineWidth(0.3);
-      for (let s = 1; s < 6; s++) {
-        const stringX = xPos + (s * chordBoxSize / 6);
+      const numStrings = guitarType;
+      for (let s = 1; s < numStrings; s++) {
+        const stringX = xPos + (s * chordBoxSize / numStrings);
         pdf.line(stringX, boxYPos, stringX, boxYPos + chordBoxSize);
       }
       
@@ -495,9 +526,9 @@ export function downloadBlankTabSheet(): void {
   yPos += 8;
   
   // Create multiple tab staff systems with better spacing
-  const tabLineSpacing = 3.5;
-  const systemSpacing = 30;
-  const numberOfSystems = 5; // Number of tab systems on first page
+  const tabLineSpacing = guitarType === 8 ? 3.0 : guitarType === 7 ? 3.2 : 3.5;
+  const systemSpacing = guitarType === 8 ? 35 : guitarType === 7 ? 32 : 30;
+  const numberOfSystems = guitarType === 8 ? 4 : guitarType === 7 ? 4 : 5; // Fewer systems for more strings
   
   for (let system = 0; system < numberOfSystems; system++) {
     const systemY = yPos + (system * systemSpacing);
@@ -512,20 +543,21 @@ export function downloadBlankTabSheet(): void {
     // Draw TAB indicator
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('TAB', margin - 12, systemY + 9);
+    pdf.text('TAB', margin - 12, systemY + (guitarType * tabLineSpacing / 2) - 2);
     
-    // Draw tab lines with proper string labels
+    // Draw tab lines with actual tuning labels
     pdf.setLineWidth(0.4);
     pdf.setFont('helvetica', 'normal');
-    const stringLabels = ['e', 'B', 'G', 'D', 'A', 'E'];
-    const stringTuning = ['E4', 'B3', 'G3', 'D3', 'A2', 'E2'];
     
-    for (let line = 0; line < 6; line++) {
+    for (let line = 0; line < guitarType; line++) {
       const lineY = systemY + (line * tabLineSpacing);
       
-      // String label (standard notation)
+      // String label from actual tuning
       pdf.setFontSize(8);
-      pdf.text(stringLabels[line], margin - 3, lineY + 1);
+      const stringNote = displayTuning[line] || '';
+      // Use just the note letter for the label
+      const noteLabel = stringNote.replace(/[0-9]/g, '').substring(0, 2);
+      pdf.text(noteLabel, margin - 3, lineY + 1);
       
       // Tab line
       pdf.setDrawColor(100, 100, 100);
@@ -537,6 +569,8 @@ export function downloadBlankTabSheet(): void {
     pdf.setLineWidth(0.6);
     pdf.setDrawColor(0, 0, 0);
     
+    const tabHeight = (guitarType - 1) * tabLineSpacing;
+    
     for (let m = 0; m <= 4; m++) {
       const barX = margin + 5 + (m * measureWidth);
       
@@ -544,14 +578,14 @@ export function downloadBlankTabSheet(): void {
       if (m === 0 || m === 4) {
         // Double bar at start and end
         pdf.setLineWidth(0.8);
-        pdf.line(barX, systemY, barX, systemY + (5 * tabLineSpacing));
+        pdf.line(barX, systemY, barX, systemY + tabHeight);
         if (m === 4) {
-          pdf.line(barX - 2, systemY, barX - 2, systemY + (5 * tabLineSpacing));
+          pdf.line(barX - 2, systemY, barX - 2, systemY + tabHeight);
         }
       } else {
         // Single bar
         pdf.setLineWidth(0.4);
-        pdf.line(barX, systemY, barX, systemY + (5 * tabLineSpacing));
+        pdf.line(barX, systemY, barX, systemY + tabHeight);
       }
       
       // Add measure numbers
@@ -576,7 +610,8 @@ export function downloadBlankTabSheet(): void {
   pdf.setTextColor(0);
   
   // More tab systems on page 2
-  for (let system = 0; system < 8; system++) {
+  const systemsOnPage2 = guitarType === 8 ? 6 : guitarType === 7 ? 7 : 8;
+  for (let system = 0; system < systemsOnPage2; system++) {
     const systemY = yPos + (system * systemSpacing);
     
     if (systemY > pageHeight - 30) break;
@@ -584,17 +619,18 @@ export function downloadBlankTabSheet(): void {
     // Draw TAB indicator
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('TAB', margin - 12, systemY + 9);
+    pdf.text('TAB', margin - 12, systemY + (guitarType * tabLineSpacing / 2) - 2);
     
-    // Draw tab lines
+    // Draw tab lines with actual tuning
     pdf.setLineWidth(0.4);
     pdf.setFont('helvetica', 'normal');
-    const stringLabels = ['e', 'B', 'G', 'D', 'A', 'E'];
     
-    for (let line = 0; line < 6; line++) {
+    for (let line = 0; line < guitarType; line++) {
       const lineY = systemY + (line * tabLineSpacing);
       pdf.setFontSize(8);
-      pdf.text(stringLabels[line], margin - 3, lineY + 1);
+      const stringNote = displayTuning[line] || '';
+      const noteLabel = stringNote.replace(/[0-9]/g, '').substring(0, 2);
+      pdf.text(noteLabel, margin - 3, lineY + 1);
       pdf.setDrawColor(100, 100, 100);
       pdf.line(margin + 5, lineY, pageWidth - margin, lineY);
     }
@@ -602,26 +638,28 @@ export function downloadBlankTabSheet(): void {
     // Add measure bars
     const measureWidth = (usableWidth - 5) / 4;
     pdf.setDrawColor(0, 0, 0);
+    const tabHeight = (guitarType - 1) * tabLineSpacing;
     
     for (let m = 0; m <= 4; m++) {
       const barX = margin + 5 + (m * measureWidth);
       
       if (m === 0 || m === 4) {
         pdf.setLineWidth(0.8);
-        pdf.line(barX, systemY, barX, systemY + (5 * tabLineSpacing));
+        pdf.line(barX, systemY, barX, systemY + tabHeight);
         if (m === 4) {
-          pdf.line(barX - 2, systemY, barX - 2, systemY + (5 * tabLineSpacing));
+          pdf.line(barX - 2, systemY, barX - 2, systemY + tabHeight);
         }
       } else {
         pdf.setLineWidth(0.4);
-        pdf.line(barX, systemY, barX, systemY + (5 * tabLineSpacing));
+        pdf.line(barX, systemY, barX, systemY + tabHeight);
       }
       
       // Measure numbers
       if (m < 4) {
         pdf.setFontSize(7);
         pdf.setTextColor(150, 150, 150);
-        pdf.text(`${20 + system * 4 + m + 1}`, barX + 2, systemY - 2);
+        const measureNum = numberOfSystems * 4 + system * 4 + m + 1;
+        pdf.text(`${measureNum}`, barX + 2, systemY - 2);
         pdf.setTextColor(0, 0, 0);
       }
     }

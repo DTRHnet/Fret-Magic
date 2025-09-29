@@ -9,25 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎸 New Features
 
-#### Blank Tab Sheet Generator (September 29, 2025)
-- **NEW**: "Blank Sheet" button in the Export menu
+#### Dynamic Blank Tab Sheet Generator (September 29, 2025)
+- **NEW**: "Blank Tab Sheet" button - dedicated button in the main toolbar
+- **NEW**: Dynamic template generation based on current guitar settings
 - **ENHANCED**: Professional-grade PDF template with improved layout
+- **DYNAMIC**: Automatically adapts to:
+  - Current guitar type (6, 7, or 8 strings)
+  - Current tuning (displays actual tuning notes on tab lines)
+  - Current key/scale (pre-fills the Key field when available)
 - Downloads a 2-page printable PDF with:
-  - Header with title "Guitar Tablature & Chord Sheet"
-  - Song information fields: Title, Artist, Key, Tempo, Time Signature, Capo
-  - 8 chord diagram boxes (2 rows of 4) with:
-    - Proper nut indication (thick top line)
-    - Fret position indicators
-    - Name lines above each diagram
-  - Multiple tab staff systems with:
-    - TAB indicators on the left
-    - Proper string labels (e, B, G, D, A, E)
+  - Header showing guitar type (e.g., "7-String Guitar Tablature & Chord Sheet")
+  - Song information fields: Title, Artist, Key, Tempo, Time, Capo, and Tuning display
+  - Chord diagram boxes adjusted for string count:
+    - 6-string: 8 boxes (2 rows of 4)
+    - 7-string: 8 boxes (2 rows of 4) with 7 strings
+    - 8-string: 6 boxes (2 rows of 3) with 8 strings
+  - Tab staff systems with:
+    - Correct number of lines matching guitar type
+    - Actual tuning notes as string labels (not hardcoded to standard)
+    - TAB indicators properly centered
+    - Adjusted spacing for extended range guitars
     - Measure numbers for easy reference
     - Double bar lines at start/end of each system
-    - 4 measures per line
-  - Page 2 with additional tab systems (up to 52 measures total)
+  - Page counts optimized per guitar type:
+    - 6-string: 52 measures total
+    - 7-string: 44 measures total  
+    - 8-string: 40 measures total
   - Professional footer with FretMagic branding
 - Perfect for transcribing songs, writing original music, or teaching
+- Tooltip shows current configuration when hovering over button
 
 ## [1.0.0] - 2025-09-29
 

@@ -243,6 +243,17 @@ export default function Home() {
                 {isDragMode ? "Exit Arrange" : "Arrange"}
               </Button>
               
+              {/* Blank Tab Sheet Button */}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => downloadBlankTabSheet(guitarType, tuning, scaleType, rootNote)}
+                title={`Generate blank tab sheet for ${guitarType}-string guitar with ${tuning.slice().reverse().join('-')} tuning`}
+              >
+                <FileMusic className="w-4 h-4 mr-2" />
+                Blank Tab Sheet
+              </Button>
+              
               <div id="export-controls">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -261,7 +272,7 @@ export default function Home() {
                       Export as PDF
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={downloadBlankTabSheet}>
+                    <DropdownMenuItem onClick={() => downloadBlankTabSheet(guitarType, tuning, scaleType, rootNote)}>
                       <FileMusic className="w-4 h-4 mr-2" />
                       Blank Sheet
                     </DropdownMenuItem>
