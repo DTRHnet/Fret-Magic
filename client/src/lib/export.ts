@@ -399,116 +399,239 @@ export function downloadBlankTabSheet(): void {
 
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 15;
+  const margin = 10;
   const usableWidth = pageWidth - (2 * margin);
   
-  // Title
-  pdf.setFontSize(16);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Guitar Tab & Chord Sheet', pageWidth / 2, 20, { align: 'center' });
+  // Header with title
+  pdf.setFillColor(245, 245, 245);
+  pdf.rect(0, 0, pageWidth, 25, 'F');
   
-  // Song info section
+  pdf.setFontSize(18);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Guitar Tablature & Chord Sheet', pageWidth / 2, 15, { align: 'center' });
+  
+  // Song info section with better layout
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
-  let yPos = 30;
+  let yPos = 32;
   
-  pdf.text('Song: _________________________________', margin, yPos);
-  pdf.text('Artist: _________________________________', pageWidth / 2, yPos);
-  yPos += 8;
-  pdf.text('Key: __________', margin, yPos);
-  pdf.text('Tempo: __________', margin + 40, yPos);
-  pdf.text('Time Signature: __________', margin + 90, yPos);
+  // Draw info boxes
+  pdf.setDrawColor(200, 200, 200);
+  pdf.setLineWidth(0.3);
   
-  // Chord diagram section
+  // Title and Artist
+  pdf.text('Title:', margin, yPos);
+  pdf.rect(margin + 10, yPos - 4, 80, 6);
+  pdf.text('Artist:', margin + 100, yPos);
+  pdf.rect(margin + 112, yPos - 4, 80, 6);
+  
+  yPos += 10;
+  // Key, Tempo, Time, Capo
+  pdf.text('Key:', margin, yPos);
+  pdf.rect(margin + 10, yPos - 4, 25, 6);
+  pdf.text('Tempo:', margin + 45, yPos);
+  pdf.rect(margin + 60, yPos - 4, 25, 6);
+  pdf.text('Time:', margin + 95, yPos);
+  pdf.rect(margin + 107, yPos - 4, 20, 6);
+  pdf.text('Capo:', margin + 137, yPos);
+  pdf.rect(margin + 149, yPos - 4, 20, 6);
+  
+  // Chord diagram section with improved layout
   yPos += 15;
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Chord Diagrams:', margin, yPos);
+  pdf.setFontSize(11);
+  pdf.text('Chord Diagrams', margin, yPos);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+  yPos += 10;
+  
+  // Draw 8 chord diagram boxes (2 rows of 4)
+  const chordBoxSize = 28;
+  const chordBoxSpacing = 48;
+  const chordsPerRow = 4;
+  
+  for (let row = 0; row < 2; row++) {
+    for (let col = 0; col < chordsPerRow; col++) {
+      const xPos = margin + 10 + (col * chordBoxSpacing);
+      const boxYPos = yPos + (row * (chordBoxSize + 20));
+      
+      // Chord name line above diagram
+      pdf.setLineWidth(0.3);
+      pdf.line(xPos - 5, boxYPos - 7, xPos + chordBoxSize + 5, boxYPos - 7);
+      
+      // Draw chord box frame
+      pdf.setLineWidth(0.5);
+      pdf.rect(xPos, boxYPos, chordBoxSize, chordBoxSize);
+      
+      // Nut (thicker line at top)
+      pdf.setLineWidth(1.5);
+      pdf.line(xPos, boxYPos, xPos + chordBoxSize, boxYPos);
+      
+      // Draw vertical lines (strings) 
+      pdf.setLineWidth(0.3);
+      for (let s = 1; s < 6; s++) {
+        const stringX = xPos + (s * chordBoxSize / 6);
+        pdf.line(stringX, boxYPos, stringX, boxYPos + chordBoxSize);
+      }
+      
+      // Draw horizontal lines (frets)
+      for (let f = 1; f < 5; f++) {
+        const fretY = boxYPos + (f * chordBoxSize / 5);
+        pdf.line(xPos, fretY, xPos + chordBoxSize, fretY);
+      }
+      
+      // Add fret position indicator space
+      pdf.setFontSize(8);
+      pdf.text('fr', xPos - 8, boxYPos + 10);
+    }
+  }
+  
+  // Tab section with improved layout
+  yPos += chordBoxSize + 50;
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(11);
+  pdf.text('Tablature', margin, yPos);
   pdf.setFont('helvetica', 'normal');
   yPos += 8;
   
-  // Draw 6 chord diagram boxes
-  const chordBoxSize = 25;
-  const chordBoxSpacing = 30;
-  for (let i = 0; i < 6; i++) {
-    const xPos = margin + (i * chordBoxSpacing);
-    
-    // Draw chord box
-    pdf.rect(xPos, yPos, chordBoxSize, chordBoxSize);
-    
-    // Draw vertical lines (strings)
-    for (let s = 1; s < 6; s++) {
-      const stringX = xPos + (s * chordBoxSize / 6);
-      pdf.line(stringX, yPos, stringX, yPos + chordBoxSize);
-    }
-    
-    // Draw horizontal lines (frets)
-    for (let f = 1; f < 5; f++) {
-      const fretY = yPos + (f * chordBoxSize / 5);
-      pdf.line(xPos, fretY, xPos + chordBoxSize, fretY);
-    }
-    
-    // Chord name placeholder
-    pdf.text('_____', xPos + chordBoxSize/2 - 5, yPos + chordBoxSize + 5);
-  }
-  
-  // Tab section
-  yPos += chordBoxSize + 20;
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Tablature:', margin, yPos);
-  pdf.setFont('helvetica', 'normal');
-  
-  // Create multiple tab staff systems
-  const tabLineSpacing = 3;
-  const systemSpacing = 25;
-  const numberOfSystems = 6; // Number of tab systems on the page
+  // Create multiple tab staff systems with better spacing
+  const tabLineSpacing = 3.5;
+  const systemSpacing = 30;
+  const numberOfSystems = 5; // Number of tab systems on first page
   
   for (let system = 0; system < numberOfSystems; system++) {
-    yPos += systemSpacing;
+    const systemY = yPos + (system * systemSpacing);
     
     // Check if we need a new page
-    if (yPos > pageHeight - 30) {
+    if (systemY > pageHeight - 40) {
       pdf.addPage();
       yPos = 20;
+      continue;
     }
     
-    // Draw tab lines
-    pdf.setLineWidth(0.3);
-    const stringLabels = ['E', 'B', 'G', 'D', 'A', 'E'];
+    // Draw TAB indicator
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('TAB', margin - 12, systemY + 9);
+    
+    // Draw tab lines with proper string labels
+    pdf.setLineWidth(0.4);
+    pdf.setFont('helvetica', 'normal');
+    const stringLabels = ['e', 'B', 'G', 'D', 'A', 'E'];
+    const stringTuning = ['E4', 'B3', 'G3', 'D3', 'A2', 'E2'];
     
     for (let line = 0; line < 6; line++) {
-      const lineY = yPos + (line * tabLineSpacing);
+      const lineY = systemY + (line * tabLineSpacing);
       
-      // String label
+      // String label (standard notation)
       pdf.setFontSize(8);
-      pdf.text(stringLabels[line], margin - 5, lineY + 1);
+      pdf.text(stringLabels[line], margin - 3, lineY + 1);
       
       // Tab line
-      pdf.line(margin, lineY, pageWidth - margin, lineY);
+      pdf.setDrawColor(100, 100, 100);
+      pdf.line(margin + 5, lineY, pageWidth - margin, lineY);
+    }
+    
+    // Add measure bars with numbers
+    const measureWidth = (usableWidth - 5) / 4; // 4 measures per line
+    pdf.setLineWidth(0.6);
+    pdf.setDrawColor(0, 0, 0);
+    
+    for (let m = 0; m <= 4; m++) {
+      const barX = margin + 5 + (m * measureWidth);
+      
+      // Draw bar line
+      if (m === 0 || m === 4) {
+        // Double bar at start and end
+        pdf.setLineWidth(0.8);
+        pdf.line(barX, systemY, barX, systemY + (5 * tabLineSpacing));
+        if (m === 4) {
+          pdf.line(barX - 2, systemY, barX - 2, systemY + (5 * tabLineSpacing));
+        }
+      } else {
+        // Single bar
+        pdf.setLineWidth(0.4);
+        pdf.line(barX, systemY, barX, systemY + (5 * tabLineSpacing));
+      }
+      
+      // Add measure numbers
+      if (m < 4) {
+        pdf.setFontSize(7);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text(`${system * 4 + m + 1}`, barX + 2, systemY - 2);
+        pdf.setTextColor(0, 0, 0);
+      }
+    }
+  }
+  
+  // Add second page with more tab systems
+  pdf.addPage();
+  yPos = 20;
+  
+  // Page 2 header
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(128);
+  pdf.text('Page 2', pageWidth / 2, 10, { align: 'center' });
+  pdf.setTextColor(0);
+  
+  // More tab systems on page 2
+  for (let system = 0; system < 8; system++) {
+    const systemY = yPos + (system * systemSpacing);
+    
+    if (systemY > pageHeight - 30) break;
+    
+    // Draw TAB indicator
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('TAB', margin - 12, systemY + 9);
+    
+    // Draw tab lines
+    pdf.setLineWidth(0.4);
+    pdf.setFont('helvetica', 'normal');
+    const stringLabels = ['e', 'B', 'G', 'D', 'A', 'E'];
+    
+    for (let line = 0; line < 6; line++) {
+      const lineY = systemY + (line * tabLineSpacing);
+      pdf.setFontSize(8);
+      pdf.text(stringLabels[line], margin - 3, lineY + 1);
+      pdf.setDrawColor(100, 100, 100);
+      pdf.line(margin + 5, lineY, pageWidth - margin, lineY);
     }
     
     // Add measure bars
-    const measureWidth = usableWidth / 4; // 4 measures per line
-    pdf.setLineWidth(0.5);
+    const measureWidth = (usableWidth - 5) / 4;
+    pdf.setDrawColor(0, 0, 0);
+    
     for (let m = 0; m <= 4; m++) {
-      const barX = margin + (m * measureWidth);
-      pdf.line(barX, yPos, barX, yPos + (5 * tabLineSpacing));
+      const barX = margin + 5 + (m * measureWidth);
+      
+      if (m === 0 || m === 4) {
+        pdf.setLineWidth(0.8);
+        pdf.line(barX, systemY, barX, systemY + (5 * tabLineSpacing));
+        if (m === 4) {
+          pdf.line(barX - 2, systemY, barX - 2, systemY + (5 * tabLineSpacing));
+        }
+      } else {
+        pdf.setLineWidth(0.4);
+        pdf.line(barX, systemY, barX, systemY + (5 * tabLineSpacing));
+      }
+      
+      // Measure numbers
+      if (m < 4) {
+        pdf.setFontSize(7);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text(`${20 + system * 4 + m + 1}`, barX + 2, systemY - 2);
+        pdf.setTextColor(0, 0, 0);
+      }
     }
   }
   
-  // Notes section at the bottom
-  const notesY = pageHeight - 25;
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(10);
-  pdf.text('Notes:', margin, notesY);
-  pdf.setFont('helvetica', 'normal');
-  pdf.line(margin + 20, notesY, pageWidth - margin, notesY);
-  pdf.line(margin, notesY + 5, pageWidth - margin, notesY + 5);
-  pdf.line(margin, notesY + 10, pageWidth - margin, notesY + 10);
-  
-  // Footer
+  // Footer on both pages
   pdf.setFontSize(8);
   pdf.setTextColor(128);
   pdf.text('Created with FretMagic - Guitar Scale Explorer', pageWidth / 2, pageHeight - 5, { align: 'center' });
+  pdf.text('www.fretmagic.app', pageWidth / 2, pageHeight - 10, { align: 'center' });
   
   // Save the PDF
   pdf.save('guitar-tab-sheet.pdf');

@@ -11,13 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Blank Tab Sheet Generator (September 29, 2025)
 - **NEW**: "Blank Sheet" button in the Export menu
-- Downloads a printable PDF with guitar tab lines and chord diagram boxes
-- Includes sections for:
-  - Song title, artist, key, tempo, and time signature
-  - 6 blank chord diagram grids for writing chord shapes
-  - Multiple tab staff systems with measure bars
-  - Notes section for additional annotations
-- Perfect for transcribing songs or writing original music
+- **ENHANCED**: Professional-grade PDF template with improved layout
+- Downloads a 2-page printable PDF with:
+  - Header with title "Guitar Tablature & Chord Sheet"
+  - Song information fields: Title, Artist, Key, Tempo, Time Signature, Capo
+  - 8 chord diagram boxes (2 rows of 4) with:
+    - Proper nut indication (thick top line)
+    - Fret position indicators
+    - Name lines above each diagram
+  - Multiple tab staff systems with:
+    - TAB indicators on the left
+    - Proper string labels (e, B, G, D, A, E)
+    - Measure numbers for easy reference
+    - Double bar lines at start/end of each system
+    - 4 measures per line
+  - Page 2 with additional tab systems (up to 52 measures total)
+  - Professional footer with FretMagic branding
+- Perfect for transcribing songs, writing original music, or teaching
 
 ## [1.0.0] - 2025-09-29
 
