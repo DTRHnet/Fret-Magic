@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Guitar, Download, FileImage, FileText, Move3D } from "lucide-react";
+import { Guitar, Download, FileImage, FileText, FileMusic, Move3D } from "lucide-react";
 import { useFretboard } from "@/hooks/use-fretboard";
 import GuitarControls from "@/components/guitar-controls";
 import ScaleControls from "@/components/scale-controls";
@@ -8,9 +8,9 @@ import TuningHelper from "@/components/tuning-helper";
 import CustomTuning from "@/components/custom-tuning";
 import Fretboard from "@/components/fretboard";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ExternalLink } from "lucide-react";
-import { exportToPNG, exportToPDF, createExportMetadata, parseConfigFromUrl } from "@/lib/export";
+import { exportToPNG, exportToPDF, createExportMetadata, parseConfigFromUrl, downloadBlankTabSheet } from "@/lib/export";
 import { SCALES } from "@/lib/music-theory";
 import { TUNING_PRESETS } from "@/lib/guitar-data";
 import ChordShapes from "@/components/chord-shapes";
@@ -259,6 +259,11 @@ export default function Home() {
                     <DropdownMenuItem onClick={handleExportPDF}>
                       <FileText className="w-4 h-4 mr-2" />
                       Export as PDF
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={downloadBlankTabSheet}>
+                      <FileMusic className="w-4 h-4 mr-2" />
+                      Blank Sheet
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

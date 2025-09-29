@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🎸 New Features
+
+#### Blank Tab Sheet Generator (September 29, 2025)
+- **NEW**: "Blank Sheet" button in the Export menu
+- Downloads a printable PDF with guitar tab lines and chord diagram boxes
+- Includes sections for:
+  - Song title, artist, key, tempo, and time signature
+  - 6 blank chord diagram grids for writing chord shapes
+  - Multiple tab staff systems with measure bars
+  - Notes section for additional annotations
+- Perfect for transcribing songs or writing original music
+
 ## [1.0.0] - 2025-09-29
 
 ### 🎸 Major Features

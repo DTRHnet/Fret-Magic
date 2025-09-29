@@ -388,3 +388,128 @@ export async function createShareableImage(
     throw error;
   }
 }
+
+export function downloadBlankTabSheet(): void {
+  // Create a new PDF document
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const margin = 15;
+  const usableWidth = pageWidth - (2 * margin);
+  
+  // Title
+  pdf.setFontSize(16);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Guitar Tab & Chord Sheet', pageWidth / 2, 20, { align: 'center' });
+  
+  // Song info section
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  let yPos = 30;
+  
+  pdf.text('Song: _________________________________', margin, yPos);
+  pdf.text('Artist: _________________________________', pageWidth / 2, yPos);
+  yPos += 8;
+  pdf.text('Key: __________', margin, yPos);
+  pdf.text('Tempo: __________', margin + 40, yPos);
+  pdf.text('Time Signature: __________', margin + 90, yPos);
+  
+  // Chord diagram section
+  yPos += 15;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Chord Diagrams:', margin, yPos);
+  pdf.setFont('helvetica', 'normal');
+  yPos += 8;
+  
+  // Draw 6 chord diagram boxes
+  const chordBoxSize = 25;
+  const chordBoxSpacing = 30;
+  for (let i = 0; i < 6; i++) {
+    const xPos = margin + (i * chordBoxSpacing);
+    
+    // Draw chord box
+    pdf.rect(xPos, yPos, chordBoxSize, chordBoxSize);
+    
+    // Draw vertical lines (strings)
+    for (let s = 1; s < 6; s++) {
+      const stringX = xPos + (s * chordBoxSize / 6);
+      pdf.line(stringX, yPos, stringX, yPos + chordBoxSize);
+    }
+    
+    // Draw horizontal lines (frets)
+    for (let f = 1; f < 5; f++) {
+      const fretY = yPos + (f * chordBoxSize / 5);
+      pdf.line(xPos, fretY, xPos + chordBoxSize, fretY);
+    }
+    
+    // Chord name placeholder
+    pdf.text('_____', xPos + chordBoxSize/2 - 5, yPos + chordBoxSize + 5);
+  }
+  
+  // Tab section
+  yPos += chordBoxSize + 20;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Tablature:', margin, yPos);
+  pdf.setFont('helvetica', 'normal');
+  
+  // Create multiple tab staff systems
+  const tabLineSpacing = 3;
+  const systemSpacing = 25;
+  const numberOfSystems = 6; // Number of tab systems on the page
+  
+  for (let system = 0; system < numberOfSystems; system++) {
+    yPos += systemSpacing;
+    
+    // Check if we need a new page
+    if (yPos > pageHeight - 30) {
+      pdf.addPage();
+      yPos = 20;
+    }
+    
+    // Draw tab lines
+    pdf.setLineWidth(0.3);
+    const stringLabels = ['E', 'B', 'G', 'D', 'A', 'E'];
+    
+    for (let line = 0; line < 6; line++) {
+      const lineY = yPos + (line * tabLineSpacing);
+      
+      // String label
+      pdf.setFontSize(8);
+      pdf.text(stringLabels[line], margin - 5, lineY + 1);
+      
+      // Tab line
+      pdf.line(margin, lineY, pageWidth - margin, lineY);
+    }
+    
+    // Add measure bars
+    const measureWidth = usableWidth / 4; // 4 measures per line
+    pdf.setLineWidth(0.5);
+    for (let m = 0; m <= 4; m++) {
+      const barX = margin + (m * measureWidth);
+      pdf.line(barX, yPos, barX, yPos + (5 * tabLineSpacing));
+    }
+  }
+  
+  // Notes section at the bottom
+  const notesY = pageHeight - 25;
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  pdf.text('Notes:', margin, notesY);
+  pdf.setFont('helvetica', 'normal');
+  pdf.line(margin + 20, notesY, pageWidth - margin, notesY);
+  pdf.line(margin, notesY + 5, pageWidth - margin, notesY + 5);
+  pdf.line(margin, notesY + 10, pageWidth - margin, notesY + 10);
+  
+  // Footer
+  pdf.setFontSize(8);
+  pdf.setTextColor(128);
+  pdf.text('Created with FretMagic - Guitar Scale Explorer', pageWidth / 2, pageHeight - 5, { align: 'center' });
+  
+  // Save the PDF
+  pdf.save('guitar-tab-sheet.pdf');
+}
